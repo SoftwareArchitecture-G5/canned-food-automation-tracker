@@ -15,8 +15,17 @@
 ```bash
     touch .env # MAC OS
 ```
-```bash
-    PORT = "8000"
+```dotenv
+    # Nest.Js Configuration variable
+    PORT='Your port such 8000'
+    
+    # Database Configuration variable
+    DB_HOST='Database Host'
+    DB_PORT='Your Database PORT'
+    DB_USERNAME='Your Database username'
+    DB_PASS='Your Database password'
+    DB_NAME='Your database name'
+    DB_SSL='SSL option true or false'
 ```
 
 ### 4. Running sever using NPM script
