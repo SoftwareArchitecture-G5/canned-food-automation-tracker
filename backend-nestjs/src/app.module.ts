@@ -4,6 +4,7 @@ import {ConfigModule} from '@nestjs/config';
 import {Module} from '@nestjs/common';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import { AutomationModule } from './automation/automation.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 import * as process from "node:process";
 
 @Module({
@@ -21,6 +22,7 @@ import * as process from "node:process";
             synchronize: true,
         }),
         AutomationModule,
+        MaintenanceModule,
 
     ],
     controllers: [AppController],
