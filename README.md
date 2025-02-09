@@ -33,3 +33,17 @@
 ```bash
     npm run start:dev
 ```
+
+## APIs Endpoint
+- ### Automation controller
+  - #### /automations (GET): Get all automations data
+  - #### /automations/:id (GET): Get automation data by specific id
+  - #### /automations (POST): Create automation data
+    ```json
+    {
+        "name": "automation name",
+        "description": "description"
+    }
+    ```
+  - #### /automations/:id (PATCH): Update automation by specific id
+  - #### /automations/:id (DELETE): Delete automation by specific id
