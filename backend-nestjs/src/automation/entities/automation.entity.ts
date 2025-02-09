@@ -1,4 +1,5 @@
-import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {Maintenance} from "../../maintenance/entities/maintenance.entity";
 
 export enum AutomationStatus {
     ACTIVE = 'active',
@@ -25,4 +26,7 @@ export class Automation {
 
     @UpdateDateColumn({type: "timestamp"})
     updated_at: Date;
+
+    @OneToMany(()=>Maintenance, (maintenance) => maintenance.automation)
+    maintenances: Maintenance[];
 }
