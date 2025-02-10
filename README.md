@@ -1,6 +1,6 @@
 # canned-food-automation-tracker
 
-## How to run the web application
+## How to run the Backend Nest.Js
 ### 1. Change directory to backend-nestjs
 ```bash
     cd backend-nestjs
@@ -33,6 +33,39 @@
 ```bash
     npm run start:dev
 ```
+
+## How to run the Frontend Next.Js
+
+### 1. Change directory to backend-nestjs
+```bash
+    cd frontend-nextjs
+ ```
+
+### 2. Install requirements dependencies
+```bash
+    # Try install requirement dependencies
+    npm install
+    
+    # If version conflict (React 19) use force option
+    npm install --force
+```
+
+### 3. Create .env file to ./frontend-nextjs
+```bash
+    touch .env.local # MAC OS
+```
+```dotenv
+    #Backend Domain
+    NEXT_PUBLIC_BACKEND_DOMAIN="http://localhost:8000" # If you set nest.js server to port 8000
+```
+
+### 4. Running frontend next.Js server by running this script
+```bash
+    # this command run next with turboPack
+    npm run dev
+```
+
+
 
 ## APIs Endpoint
 - ### Automation controller
