@@ -13,50 +13,15 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Play, Pause, MoreHorizontal } from "lucide-react"
+import {Automation} from "@/type/automation";
 
-// Sample data
-const automations = [
-    {
-        id: "AUT001",
-        name: "Daily Backup",
-        description: "Performs daily backup of all systems",
-        status: "Active",
-        latestMaintenance: "2023-05-15",
-        nextMaintenance: "2023-06-15",
-    },
-    {
-        id: "AUT002",
-        name: "Weekly Report",
-        description: "Generates and sends weekly performance reports",
-        status: "Inactive",
-        latestMaintenance: "2023-05-10",
-        nextMaintenance: "2023-05-17",
-    },
-    {
-        id: "AUT003",
-        name: "Error Monitoring",
-        description: "Monitors systems for errors and sends alerts",
-        status: "Active",
-        latestMaintenance: "2023-05-12",
-        nextMaintenance: "2023-06-12",
-    },
-]
+interface AutomationTableProps {
+    automationsData: Automation[];
+}
 
-export function AutomationTable() {
-    const [automationData, setAutomationData] = useState(automations)
+export function AutomationTable({automationsData}: AutomationTableProps) {
+    const [automations, setAutomations] = useState(automationsData)
 
-    const toggleStatus = (id: string) => {
-        setAutomationData((prevData) =>
-            prevData.map((automation) =>
-                automation.id === id
-                    ? {
-                        ...automation,
-                        status: automation.status === "Active" ? "Inactive" : "Active",
-                    }
-                    : automation,
-            ),
-        )
-    }
 
     return (
         <div className="container mx-auto py-10">
@@ -67,22 +32,22 @@ export function AutomationTable() {
                         <TableHead>Name</TableHead>
                         <TableHead>Description</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Latest Maintenance</TableHead>
-                        <TableHead>Next Maintenance</TableHead>
+                        <TableHead>Created Date</TableHead>
+                        <TableHead>Updated Date</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {automationData.map((automation) => (
-                        <TableRow key={automation.id}>
-                            <TableCell className="font-medium">{automation.id}</TableCell>
+                    {automations.map((automation) => (
+                        <TableRow key={automation.automation_id}>
+                            <TableCell className="font-medium">{automation.automation_id}</TableCell>
                             <TableCell>{automation.name}</TableCell>
                             <TableCell>{automation.description}</TableCell>
                             <TableCell>
-                                <Badge variant={automation.status === "Active" ? "default" : "secondary"}>{automation.status}</Badge>
+                                <Badge variant={automation.status === "active" ? "default" : "secondary"}>{automation.status}</Badge>
                             </TableCell>
-                            <TableCell>{automation.latestMaintenance}</TableCell>
-                            <TableCell>{automation.nextMaintenance}</TableCell>
+                            <TableCell>{new Date(automation.created_at).toLocaleString()}</TableCell>
+                            <TableCell>{new Date(automation.updated_at).toLocaleString()}</TableCell>
                             <TableCell className="text-right">
                                 <Dialog>
                                     <DialogTrigger asChild>
@@ -97,17 +62,6 @@ export function AutomationTable() {
                                             <DialogDescription>Manage the automation "{automation.name}"</DialogDescription>
                                         </DialogHeader>
                                         <div className="flex justify-between items-center">
-                                            <Button variant="outline" onClick={() => toggleStatus(automation.id)}>
-                                                {automation.status === "Active" ? (
-                                                    <>
-                                                        <Pause className="mr-2 h-4 w-4" /> Pause
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Play className="mr-2 h-4 w-4" /> Activate
-                                                    </>
-                                                )}
-                                            </Button>
                                             <Button variant="default">Edit</Button>
                                         </div>
                                     </DialogContent>

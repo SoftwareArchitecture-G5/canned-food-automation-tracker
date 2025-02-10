@@ -10,9 +10,17 @@ import {
 } from "@/components/ui/dialog"
 import {Button} from "@/components/ui/button"
 import {CirclePlus} from "lucide-react";
+import {Automation} from "@/type/automation";
 
 
-export default function AutomationPage() {
+export default async function AutomationPage() {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`, {
+        headers: {"Content-Type": "application/json"},
+        method: "GET",
+        credentials: "include",
+    });
+    const automationData: Automation[] = await response.json();
+
     return (
         <div>
             <div className="text-xl font-bold">Automations management</div>
@@ -31,7 +39,7 @@ export default function AutomationPage() {
                     <CreateAutomationForm/>
                 </DialogContent>
             </Dialog>
-            <AutomationTable/>
+            <AutomationTable automationsData={automationData} />
         </div>
     )
 }
