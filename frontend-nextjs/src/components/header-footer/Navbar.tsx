@@ -6,15 +6,16 @@ export const Navbar = () => {
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between p-4 shadow-md px-32">
             <div className="font-bold text-2xl ">
-                Automation Tracker
+            <Link href="/" className="">Automation Tracker</Link>
             </div>
             <div className="flex flex-col sm:flex-row space-x-4 items-center">
-                <Link href="#" className="">Home</Link>
-                <Link href="#" className="">Automation</Link>
-                <Link href="#" className="">Blueprint</Link>
-                <Link href="#" className="">Calendar</Link>
+                <Link href="/" className="">Home</Link>
+                <Link href="/automations" className="">Automation</Link>
+                <Link href="/dashboard" className="">Dashboard</Link>
+                <Link href="/blueprint" className="">Blueprint</Link>
+                <Link href="/calendar" className="">Calendar</Link>
                 <Button asChild>
-                    <Link href="#">Sign Up</Link>
+                    <Link href="/signup">Sign Up</Link>
                 </Button>
                 <ModeToggle />
             </div>
