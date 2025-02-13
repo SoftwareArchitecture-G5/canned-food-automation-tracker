@@ -1,9 +1,9 @@
 "use client"
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
+import { Dialog, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Maintenance } from "@/type/maintenance";
 
@@ -52,97 +52,141 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
         getAutomationId();
     }, [params]);
 
-    // const handleSubmit = async (event: React.FormEvent) => {
-    //     event.preventDefault(); // Prevent default form submission (redirect)
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
     
-    //     const formData = new FormData(event.target as HTMLFormElement);
+        const formData = new FormData(event.target as HTMLFormElement);
+        const issueReport = formData.get("issue_report") as string;
+        const date = formData.get("date") as string;
     
-    //     const response = await fetch('http://localhost:8000/maintenances/', {
-    //       method: 'POST',
-    //       body: formData,
-    //     });
+        const newMaintenance = {
+            issue_report: issueReport,
+            date: date,
+            status: "pending",
+            automation_id: automationId,
+        };
     
-    //     if (response.ok) {
-    //       const result = await response.json();
-    //       alert('Maintenance created successfully!');
-    //       // Optionally, handle the response (e.g., reset form, show a success message)
-    //     } else {
-    //       alert('Error creating maintenance!');
-    //     }
-    // };
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/`;
+        try {
+            const response = await fetch(url, {
+                headers: { "Content-Type": "application/json" },
+                method: "POST",
+                credentials: "include",
+                body: JSON.stringify(newMaintenance),
+            });
+    
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            const data = await response.json();
+            console.log("Maintenance created:", data);
+        } catch (error) {
+            console.error("Error creating maintenance:", error);
+        }
+    
+        console.log("Form submitted");
+    };
+
+    const handleDelete = async (maintenanceId: string) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this maintenance?");
+        if (confirmDelete) {
+            try {
+                const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/${maintenanceId}`;
+                const response = await fetch(url, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                setMaintenanceData(maintenanceData.filter(item => item.maintenance_id !== maintenanceId)); // Remove item from the state
+            } catch (error) {
+                console.error("Error deleting maintenance:", error);
+            }
+        }
+    };
+
+    const handleEdit = (item: Maintenance) => {
+        console.log("Edit item", item);
+    };
 
     return (
-    <>
-    {/* Form */}
-    {/* <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-        <Label htmlFor="issue_report">Issue</Label>
-        <Input id="issue_report" name="issue_report" type="text" required />
-        </div>
+        <>
+            {/* Trigger button for opening the dialog */}
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button>Create Maintenance</Button>
+                </DialogTrigger>
 
-      <div>
-        <Label htmlFor="date">Date</Label>
-        <Input id="date" name="date" type="date" required />
-      </div>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Create New Maintenance</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <Label htmlFor="issue_report">Issue</Label>
+                            <Input id="issue_report" name="issue_report" type="text" required />
+                        </div>
+                        <div>
+                            <Label htmlFor="date">Date</Label>
+                            <Input id="date" name="date" type="date" required />
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit">Submit</Button>
+                            <DialogClose asChild>
+                                <Button variant="secondary">
+                                    Cancel
+                                </Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
-      <div>
-        <Label htmlFor="status">Status</Label>
-        <Select id="status" name="status" value={status} onChange={(e) => setStatus(e.target.value)} required>
-          <SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-            </SelectContent>
-          </SelectTrigger>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="automation_id">Automation</Label>
-        <Select id="automation_id" name="automation_id" required>
-          <SelectTrigger>
-            <SelectContent>
-              <SelectItem value="b2e8d2f5-b86b-4611-80eb-29fef7192675">Automation 2</SelectItem>
-              <SelectItem value="5bcdff1a-51b1-4ac5-b6c9-9941a34fc2ac">Automation 5</SelectItem>
-            </SelectContent>
-          </SelectTrigger>
-        </Select>
-      </div>
-
-      <Button type="submit">Create Maintenance</Button>
-    </form> */}
-
-    {/* Table */}
-        {automationId}
-        <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
-        <Input
-            placeholder="Search by issue or automation..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full max-w-md mb-5"
-        />
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Maintenance ID</TableHead>
-                    <TableHead>Issue</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Automation</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {filteredData.map((item) => (
-                <TableRow key={item.maintenance_id}>
-                    <TableCell>{item.maintenance_id}</TableCell>
-                    <TableCell>{item.issue_report}</TableCell>
-                    <TableCell>{item.date}</TableCell>
-                    <TableCell>{item.status}</TableCell>
-                    <TableCell>{item.automation.name}</TableCell>
-                </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    </>
+            {/* Table */}
+            {automationId}
+            <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
+            <Input
+                placeholder="Search by issue or automation..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full max-w-md mb-5"
+            />
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Maintenance ID</TableHead>
+                        <TableHead>Issue</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Automation</TableHead>
+                        <TableHead>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {filteredData.map((item) => (
+                        <TableRow key={item.maintenance_id}>
+                            <TableCell>{item.maintenance_id}</TableCell>
+                            <TableCell>{item.issue_report}</TableCell>
+                            <TableCell>{item.date}</TableCell>
+                            <TableCell>{item.status}</TableCell>
+                            <TableCell>{item.automation.name}</TableCell>
+                            <TableCell>
+                                <Button 
+                                    onClick={() => handleEdit(item)} 
+                                    variant="outline"
+                                    className="mr-2"
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    onClick={() => handleDelete(item.maintenance_id)} 
+                                    variant="destructive"
+                                >
+                                    Delete
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </>
     );
 }
