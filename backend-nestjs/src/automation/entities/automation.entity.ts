@@ -27,6 +27,6 @@ export class Automation {
     @UpdateDateColumn({type: "timestamp"})
     updated_at: Date;
 
-    @OneToMany(()=>Maintenance, (maintenance) => maintenance.automation)
+    @OneToMany(()=>Maintenance, (maintenance) => maintenance.automation, {cascade: true})
     maintenances: Maintenance[];
 }
