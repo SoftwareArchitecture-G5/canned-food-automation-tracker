@@ -1,5 +1,6 @@
-import {AutomationTable} from "@/components/automation-page/AutomationTable";
-import {CreateAutomationForm} from "@/components/automation-page/AutomationCreateForm";
+"use client"
+import { AutomationTable } from "@/components/automation-page/AutomationTable";
+import { CreateAutomationForm } from "@/components/automation-page/AutomationCreateForm";
 import {
     Dialog,
     DialogContent,
@@ -7,26 +8,46 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog"
-import {Button} from "@/components/ui/button"
-import {CirclePlus} from "lucide-react";
-import {Automation} from "@/type/automation";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { CirclePlus } from "lucide-react";
+import { Automation } from "@/type/automation";
+import { useState, useEffect } from "react";
 
+export default function AutomationPage() {
+    const [automations, setAutomations] = useState<Automation[]>([]);
+    const [loading, isLoading] = useState(true)
 
-export default async function AutomationPage() {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`, {
-        headers: {"Content-Type": "application/json"},
-        method: "GET",
-        credentials: "include",
-    });
-    const automationData: Automation[] = await response.json();
+    useEffect(() => {
+        async function fetchAutomations() {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`, {
+                headers: { "Content-Type": "application/json" },
+                method: "GET",
+                credentials: "include",
+            });
+            const automationData: Automation[] = await response.json();
+            setAutomations(automationData);
+            isLoading(false)
+        }
+        
+
+        fetchAutomations();
+    }, []);
+
+    const handleAutomationCreated = (newAutomation: Automation) => {
+        setAutomations((prev) => [...prev, newAutomation]);
+    };
+
+    if (loading) {
+        return <div>Loading automations...</div>
+    }
 
     return (
         <div>
             <div className="text-xl font-bold">Automations management</div>
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button variant={'default'}>
+                    <Button variant={"default"}>
                         Adding Automation
                         <CirclePlus />
                     </Button>
@@ -36,10 +57,10 @@ export default async function AutomationPage() {
                         <DialogTitle>Form add create automation</DialogTitle>
                         <DialogDescription>Complete form to add new automation</DialogDescription>
                     </DialogHeader>
-                    <CreateAutomationForm/>
+                    <CreateAutomationForm onAutomationCreated={handleAutomationCreated} />
                 </DialogContent>
             </Dialog>
-            <AutomationTable automationsData={automationData} />
+            <AutomationTable automationsData={automations} />
         </div>
-    )
+    );
 }
