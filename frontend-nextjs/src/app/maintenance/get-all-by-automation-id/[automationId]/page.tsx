@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Dialog, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
 import { Maintenance } from "@/type/maintenance";
 
 
@@ -12,6 +13,8 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     const [search, setSearch] = useState("");
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const [automationId, setAutomationId] = useState<string | null>(null);
+    const [editData, setEditData] = useState<Maintenance | null>(null); // Data for editing
+    const [isOpen, setIsOpen] = useState(false); // Dialog visibility
 
     // Filtered data based on search input
     const filteredData = maintenanceData.filter(
@@ -78,6 +81,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             const data = await response.json();
             console.log("Maintenance created:", data);
+            setIsOpen(false); // Close the dialog
         } catch (error) {
             console.error("Error creating maintenance:", error);
         }
@@ -104,12 +108,47 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     };
 
     const handleEdit = (item: Maintenance) => {
-        console.log("Edit item", item);
+        setEditData(item); // Set item data for editing
+        setIsOpen(true); // Open dialog
+    };
+
+    const handleUpdate = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target as HTMLFormElement);
+        const issueReport = formData.get("issue_report") as string;
+        const date = formData.get("date") as string;
+        const status = formData.get("status") as string;
+
+        const updatedMaintenance = {
+            issue_report: issueReport,
+            date: date,
+            status: status,
+        };
+
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/${editData?.maintenance_id}`;
+
+        try {
+        const response = await fetch(url, {
+            headers: { "Content-Type": "application/json" },
+            method: "PATCH",
+            credentials: "include",
+            body: JSON.stringify(updatedMaintenance),
+        });
+
+        console.log(JSON.stringify(updatedMaintenance))
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        console.log("Maintenance updated:", data);
+        setIsOpen(false); // Close the dialog
+        } catch (error) {
+        console.error("Error updating maintenance:", error);
+        }
     };
 
     return (
         <>
-            {/* Trigger button for opening the dialog */}
+            {/* Create dialog */}
             <Dialog>
                 <DialogTrigger asChild>
                     <Button>Create Maintenance</Button>
@@ -141,7 +180,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
             </Dialog>
 
             {/* Table */}
-            {automationId}
+            {/* {automationId} */}
             <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
             <Input
                 placeholder="Search by issue or automation..."
@@ -176,6 +215,55 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                                 >
                                     Edit
                                 </Button>
+
+                                 {/* Dialog for editing */}
+                                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                                    <DialogContent>
+                                    <DialogTitle>Edit Maintenance</DialogTitle>
+                                    <form onSubmit={handleUpdate}>
+                                        {/* Issue Report */}
+                                        <div>
+                                        <Label htmlFor="issue_report">Issue Report</Label>
+                                        <Input
+                                            id="issue_report"
+                                            name="issue_report"
+                                            type="text"
+                                            required
+                                            defaultValue={editData?.issue_report || ""}
+                                        />
+                                        </div>
+
+                                        {/* Date */}
+                                        <div>
+                                        <Label htmlFor="date">Date</Label>
+                                        <Input
+                                            id="date"
+                                            name="date"
+                                            type="date"
+                                            required
+                                            defaultValue={editData?.date || ""}
+                                        />
+                                        </div>
+
+                                        {/* Status */}
+                                        <div>
+                                        <Label htmlFor="status">Status</Label>
+                                        <Select id="status" name="status" defaultValue={editData?.status || "pending"} required>
+                                            <SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="resolved">Resolved</SelectItem>
+                                            </SelectContent>
+                                            </SelectTrigger>
+                                        </Select>
+                                        </div>
+
+                                        <DialogFooter>
+                                        <Button type="submit">Update Maintenance</Button>
+                                        </DialogFooter>
+                                    </form>
+                                    </DialogContent>
+                                </Dialog>                
                                 <Button
                                     onClick={() => handleDelete(item.maintenance_id)} 
                                     variant="destructive"
