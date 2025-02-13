@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
+
+interface Maintenance {
+  maintenance_id: string;
+  issue_report: string;
+  date: string; // Ensure this is a string in YYYY-MM-DD format
+}
+
 import { Maintenance } from "@/type/calendar";
+
 
 export default function MaintenanceCalendar() {
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
@@ -43,7 +51,7 @@ export default function MaintenanceCalendar() {
                 initialView: "dayGridMonth",
                 events: events,
             });
-    
+
             calendar.render();
         }
     }, [maintenanceData]);

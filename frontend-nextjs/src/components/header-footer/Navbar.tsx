@@ -15,13 +15,14 @@ export const Navbar = () => {
             <div className="flex font-bold text-2xl items-center gap-4">
                 <MonitorCog/>
             <Link href="/" className="">Automation Tracker</Link>
+
             </div>
             <div className="flex flex-col sm:flex-row space-x-4 items-center">
-                <Link href="/" className="">Home</Link>
-                <Link href="/automations" className="">Automation</Link>
-                <Link href="/dashboard" className="">Dashboard</Link>
-                <Link href="/blueprint" className="">Blueprint</Link>
+                <Link href="#" className="">Home</Link>
+                <Link href="#" className="">Automation</Link>
+                <Link href="#" className="">Blueprint</Link>
                 <Link href="/calendar" className="">Calendar</Link>
+
                 <SignedOut>
                     <Button asChild variant="outline">
                         <SignInButton/>
@@ -33,6 +34,7 @@ export const Navbar = () => {
                 <SignedIn>
                         <UserButton/>
                 </SignedIn>
+
                 <ModeToggle />
             </div>
         </div>
