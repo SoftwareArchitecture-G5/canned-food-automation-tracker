@@ -147,7 +147,17 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     };
 
     return (
-        <>
+        <div>
+
+            {/* Table */}
+            {/* {automationId} */}
+            <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
+            <Input
+                placeholder="Search by issue or automation..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full max-w-md mb-5"
+            />
             {/* Create dialog */}
             <Dialog>
                 <DialogTrigger asChild>
@@ -179,15 +189,6 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                 </DialogContent>
             </Dialog>
 
-            {/* Table */}
-            {/* {automationId} */}
-            <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
-            <Input
-                placeholder="Search by issue or automation..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full max-w-md mb-5"
-            />
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -275,6 +276,6 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                     ))}
                 </TableBody>
             </Table>
-        </>
+        </div>
     );
 }
