@@ -12,7 +12,7 @@ export const Navbar = () => {
                 <Link href="#" className="">Home</Link>
                 <Link href="#" className="">Automation</Link>
                 <Link href="#" className="">Blueprint</Link>
-                <Link href="#" className="">Calendar</Link>
+                <Link href="/calendar" className="">Calendar</Link>
                 <Button asChild>
                     <Link href="#">Sign Up</Link>
                 </Button>

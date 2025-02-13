@@ -5,6 +5,9 @@ import {Module} from '@nestjs/common';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import { AutomationModule } from './automation/automation.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
+import { CalendarController } from './calendar/calendar.controller';
+import { CalendarService } from './calendar/calendar.service';
+import { CalendarModule } from './calendar/calendar.module';
 import * as process from "node:process";
 
 @Module({
@@ -23,10 +26,11 @@ import * as process from "node:process";
         }),
         AutomationModule,
         MaintenanceModule,
+        CalendarModule,
 
     ],
-    controllers: [AppController],
-    providers: [AppService],
+    controllers: [AppController, CalendarController],
+    providers: [AppService, CalendarService],
 })
 export class AppModule {
 }
