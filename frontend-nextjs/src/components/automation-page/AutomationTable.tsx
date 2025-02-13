@@ -27,6 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { EditAutomationForm } from "./AutomationEditForm";
+import Link from "next/link";
 
 interface AutomationTableProps {
   automationsData: Automation[];
@@ -89,7 +90,9 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
           {automations.map((automation) => (
             <TableRow key={automation.automation_id}>
               <TableCell className="font-medium">
-                {automation.automation_id}
+                <Link href={`/maintenance/get-all-by-automation-id/${automation.automation_id}`}>
+                  {automation.automation_id}
+                </Link>
               </TableCell>
               <TableCell>{automation.name}</TableCell>
               <TableCell>{automation.description}</TableCell>
