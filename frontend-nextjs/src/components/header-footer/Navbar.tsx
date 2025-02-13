@@ -33,7 +33,6 @@ export const Navbar = () => {
                 <SignedIn>
                         <UserButton/>
                 </SignedIn>
-
                 <ModeToggle />
             </div>
         </div>
