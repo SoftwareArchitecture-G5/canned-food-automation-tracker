@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { toast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
     name: z
@@ -28,10 +28,10 @@ const formSchema = z.object({
         .max(100, {
             message: "Description must not exceed 100 characters.",
         }),
-})
+});
 
-export function CreateAutomationForm() {
-    const [isSubmitting, setIsSubmitting] = useState(false)
+export function CreateAutomationForm({ onAutomationCreated }: { onAutomationCreated: (automation: any) => void }) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -39,20 +39,45 @@ export function CreateAutomationForm() {
             name: "",
             description: "",
         },
-    })
+    });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsSubmitting(true)
-        // Simulate API call
-        setTimeout(() => {
-            console.log(values)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(values),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create automation");
+            }
+
+            const newAutomation = await response.json();
+
+            onAutomationCreated(newAutomation);
+
             toast({
                 title: "Automation created",
                 description: `${values.name} has been successfully created.`,
-            })
-            setIsSubmitting(false)
-            form.reset()
-        }, 1000)
+            });
+
+            form.reset();
+        } catch (error) {
+            console.error("Error creating automation:", error);
+            toast({
+                title: "Error",
+                description: "Failed to create automation. Please try again later.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -101,6 +126,5 @@ export function CreateAutomationForm() {
                 </Form>
             </CardContent>
         </Card>
-    )
+    );
 }
-

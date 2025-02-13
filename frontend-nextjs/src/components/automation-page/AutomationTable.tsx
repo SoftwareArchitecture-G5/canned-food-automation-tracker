@@ -22,7 +22,7 @@ interface AutomationTableProps {
 export function AutomationTable({automationsData}: AutomationTableProps) {
     const [automations, setAutomations] = useState(automationsData)
 
-
+    console.log(automations)
     return (
         <div className="container mx-auto py-10">
             <Table>
