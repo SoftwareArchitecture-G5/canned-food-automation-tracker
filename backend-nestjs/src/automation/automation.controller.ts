@@ -28,6 +28,7 @@ export class AutomationController {
   @Get(':id')
   @ApiOperation({ summary: 'Get an automation by ID' })
   @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: 200, description: 'Get automation by ID', type: Automation })
   async findOne(@Param('id') id: string): Promise<Automation> {
     return this.automationService.findOne(id);
   }
