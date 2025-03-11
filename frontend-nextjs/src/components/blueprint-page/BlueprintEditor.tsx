@@ -71,15 +71,31 @@ export default function BlueprintEditor() {
         setNodes((prev) => [...prev, newNode]);
     };
 
+    const handleSave = async () => {
+        const blueprintData = { nodes, edges };
 
+        try {
+            await fetch("/api/save-blueprint", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(blueprintData),
+            });
+            alert("Blueprint saved!");
+        } catch (error) {
+            console.error("Error saving blueprint:", error);
+        }
+    };
 
     return (
         <div
             ref={setNodeRef}
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
-            style={{ width: "100%", height: "500px", border: "1px solid black" }}
+            className="w-full h-full"
         >
+            <button onClick={handleSave} className="p-2 bg-blue-500 text-white">
+                Save Blueprint
+            </button>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
