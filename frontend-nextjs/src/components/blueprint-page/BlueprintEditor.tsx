@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useState } from "react";
 import ReactFlow, {
     addEdge,
@@ -11,6 +13,7 @@ import ReactFlow, {
     EdgeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import { useDroppable } from "@dnd-kit/core";
 
 const initialNodes: Node[] = [
     {
@@ -27,6 +30,10 @@ export default function BlueprintEditor() {
     const [nodes, setNodes] = useState<Node[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
+    const { setNodeRef } = useDroppable({
+        id: "blueprint-dropzone",
+    });
+
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
         []
@@ -42,8 +49,37 @@ export default function BlueprintEditor() {
         []
     );
 
+    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const automationType = event.dataTransfer.getData("automationType");
+
+        if (!automationType) return;
+
+        const dropZoneRect = event.currentTarget.getBoundingClientRect();
+        const position = {
+            x: event.clientX - dropZoneRect.left, // คำนวณพิกัดภายใน Blueprint
+            y: event.clientY - dropZoneRect.top,
+        };
+
+        const newNode: Node = {
+            id: `${nodes.length + 1}`,
+            type: "default",
+            position, // ใช้พิกัดที่คำนวณใหม่
+            data: { label: automationType },
+        };
+
+        setNodes((prev) => [...prev, newNode]);
+    };
+
+
+
     return (
-        <div style={{ width: "100%", height: "500px", border: "1px solid black" }}>
+        <div
+            ref={setNodeRef}
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            style={{ width: "100%", height: "500px", border: "1px solid black" }}
+        >
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
