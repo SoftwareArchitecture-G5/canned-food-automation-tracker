@@ -8,6 +8,7 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
 import { CalendarController } from './calendar/calendar.controller';
 import { CalendarService } from './calendar/calendar.service';
 import { CalendarModule } from './calendar/calendar.module';
+import { BlueprintModule } from './blueprint/blueprint.module';
 import * as process from "node:process";
 
 @Module({
@@ -27,6 +28,7 @@ import * as process from "node:process";
         AutomationModule,
         MaintenanceModule,
         CalendarModule,
+        BlueprintModule,
 
     ],
     controllers: [AppController, CalendarController],
