@@ -153,7 +153,7 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
             className="w-full h-4/5 mx-6"
         >
             <div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 mb-8">
                     <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                             <Button
@@ -225,8 +225,6 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
-                </div>
-                <div className="my-5">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant={"outline"}>
@@ -243,6 +241,7 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+
             </div>
             <ReactFlow
                 nodes={nodes}
