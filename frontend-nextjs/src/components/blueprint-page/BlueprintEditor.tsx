@@ -1,4 +1,5 @@
 "use client";
+
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -35,6 +36,9 @@ import {
 } from "@/components/ui/popover"
 import {Check, ChevronsUpDown} from "lucide-react"
 import {cn} from "@/lib/utils"
+import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface Props {
     initialNodes: Node[];
@@ -69,8 +73,10 @@ const frameworks = [
 export default function BlueprintEditor({initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved}: Props) {
     const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
     const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
-    const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState("")
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [blueprintName, setBlueprintName] = useState("");
+    const [open, setOpen] = React.useState(false);
+    const [value, setValue] = React.useState("");
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -117,11 +123,34 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
         onAutomationRemoved(nodeId); // แจ้งว่า automation ถูกนำออก
     };
 
+    const handleSave = async () => {
+        if (!blueprintName) {
+            alert("Please enter a blueprint name!");
+            return;
+        }
+
+        const blueprintData = { name: blueprintName, nodes, edges };
+        console.log(blueprintData);
+
+        try {
+            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint/save`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(blueprintData),
+            });
+
+            alert("Blueprint saved!");
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Error saving blueprint:", error);
+        }
+    };
+
     return (
         <div
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
-            className="w-full h-full p-4"
+            className="w-full h-4/5 mx-6"
         >
             <div>
                 <div className="flex gap-4">
@@ -169,7 +198,33 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                         </PopoverContent>
                     </Popover>
                     <Button onClick={() => console.log("Save Blueprint")}>Save</Button>
-                    <Button variant={"outline"} onClick={() => console.log("Save Blueprint")}>Create New</Button>
+                    <Button onClick={() => setIsDialogOpen(true)}>Create New</Button>
+
+                    {/* ShadCN Dialog */}
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Save Blueprint</DialogTitle>
+                            </DialogHeader>
+
+                            <div className="flex flex-col gap-4">
+                                <Label htmlFor="blueprintName">Blueprint Name</Label>
+                                <Input
+                                    id="blueprintName"
+                                    value={blueprintName}
+                                    onChange={(e) => setBlueprintName(e.target.value)}
+                                    placeholder="Enter blueprint name..."
+                                />
+                            </div>
+
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onClick={handleSave}>Save</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
                 <div className="my-5">
                     <DropdownMenu>
