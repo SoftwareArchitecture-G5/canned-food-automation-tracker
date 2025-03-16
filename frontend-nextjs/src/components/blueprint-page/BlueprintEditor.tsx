@@ -13,24 +13,18 @@ import ReactFlow, {
     EdgeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { useDroppable } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface Props {
     initialNodes: Node[];
     initialEdges: Edge[];
+    onAutomationUsed: (automationId: string) => void;
+    onAutomationRemoved: (automationId: string) => void;
 }
 
-export default function BlueprintEditor({ initialNodes, initialEdges }: Props) {
+export default function BlueprintEditor({ initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved }: Props) {
     const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
     const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [blueprintName, setBlueprintName] = useState("");
-
-    const { setNodeRef } = useDroppable({ id: "blueprint-dropzone" });
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -49,10 +43,11 @@ export default function BlueprintEditor({ initialNodes, initialEdges }: Props) {
 
     const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
-        if (!nodes) return;
 
-        const automationType = event.dataTransfer.getData("automationType");
-        if (!automationType) return;
+        const automationData = event.dataTransfer.getData("automation");
+        if (!automationData) return;
+
+        const automation = JSON.parse(automationData);
 
         const dropZoneRect = event.currentTarget.getBoundingClientRect();
         const position = {
@@ -61,73 +56,35 @@ export default function BlueprintEditor({ initialNodes, initialEdges }: Props) {
         };
 
         const newNode: Node = {
-            id: `${nodes.length + 1}`,
+            id: automation.automation_id,
             type: "default",
             position,
-            data: { label: automationType },
+            data: { label: automation.name },
         };
 
         setNodes((prev) => [...prev, newNode]);
+        onAutomationUsed(automation.automation_id); // แจ้งว่า automation ถูกใช้
     };
 
-    const handleSave = async () => {
-        if (!blueprintName) {
-            alert("Please enter a blueprint name!");
-            return;
-        }
-
-        const blueprintData = { name: blueprintName, nodes, edges };
-        console.log(blueprintData);
-
-        try {
-            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint/save`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(blueprintData),
-            });
-
-            alert("Blueprint saved!");
-            setIsDialogOpen(false);
-        } catch (error) {
-            console.error("Error saving blueprint:", error);
-        }
+    const removeNode = (nodeId: string) => {
+        setNodes((prev) => prev.filter((node) => node.id !== nodeId));
+        onAutomationRemoved(nodeId); // แจ้งว่า automation ถูกนำออก
     };
 
     return (
         <div
-            ref={setNodeRef}
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
             className="w-full h-full p-4"
         >
-            <Button onClick={() => setIsDialogOpen(true)}>Save</Button>
-
-            {/* ShadCN Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Save Blueprint</DialogTitle>
-                    </DialogHeader>
-
-                    <div className="flex flex-col gap-4">
-                        <Label htmlFor="blueprintName">Blueprint Name</Label>
-                        <Input
-                            id="blueprintName"
-                            value={blueprintName}
-                            onChange={(e) => setBlueprintName(e.target.value)}
-                            placeholder="Enter blueprint name..."
-                        />
-                    </div>
-
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button onClick={handleSave}>Save</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
+            <Button onClick={() => console.log("Save Blueprint")}>Save</Button>
+            <div>
+                {nodes.map((node) => (
+                    <Button key={node.id} onClick={() => removeNode(node.id)}>
+                        Remove {node.data.label}
+                    </Button>
+                ))}
+            </div>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -138,6 +95,7 @@ export default function BlueprintEditor({ initialNodes, initialEdges }: Props) {
             >
                 <Background />
             </ReactFlow>
+
         </div>
     );
 }
