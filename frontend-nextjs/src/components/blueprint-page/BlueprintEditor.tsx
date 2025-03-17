@@ -47,15 +47,17 @@ interface Props {
     onAutomationUsed: (automationId: string) => void;
     onAutomationRemoved: (automationId: string) => void;
     blueprints: Blueprint[];
+    onBlueprintSelect: (blueprintId: string) => void; // New prop for blueprint selection
 }
 
-export default function BlueprintEditor({initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved, blueprints}: Props) {
+export default function BlueprintEditor({initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved, blueprints, onBlueprintSelect}: Props) {
     const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
     const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [blueprintName, setBlueprintName] = useState("");
     const [open, setOpen] = React.useState(false);
     const [value, setValue] = React.useState("");
+
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -158,7 +160,10 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                                                 key={blueprint.blueprint_id}
                                                 value={blueprint.blueprint_id} // Correctly pass the ID to the value
                                                 onSelect={() => {
-                                                    setValue(blueprint.blueprint_id); // Set the ID as the value
+                                                    setValue(blueprint.blueprint_id);
+                                                    setNodes(blueprint.nodes);
+                                                    setEdges(blueprint.edges);
+                                                    onBlueprintSelect(blueprint.blueprint_id); // Sync selected blueprint
                                                     setOpen(false);
                                                 }}
                                             >

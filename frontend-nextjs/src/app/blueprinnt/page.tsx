@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { fetchBlueprintData } from "@/app/blueprinnt/action";
 import AutomationPanel from "@/components/blueprint-page/AutomationPanel";
-import {Blueprint} from "@/type/blueprint";
+import { Blueprint } from "@/type/blueprint";
 
 const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/BlueprintEditor"), {
     ssr: false,
@@ -14,8 +14,9 @@ export default function BlueprintPage() {
     const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
     const [currentBlueprint, setCurrentBlueprint] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
     const [automations, setAutomations] = useState<{ automation_id: string; name: string }[]>([]);
-    const [usedAutomations, setUsedAutomations] = useState<string[]>([]); // State สำหรับเก็บ automation ที่ถูกใช้ไปแล้ว
+    const [usedAutomations, setUsedAutomations] = useState<string[]>([]); // State for used automations
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const loadBlueprint = async () => {
@@ -35,7 +36,7 @@ export default function BlueprintPage() {
                 const automationData = await automationResponse.json();
                 setAutomations(automationData);
 
-                // ตรวจสอบว่ามี automation ไหนถูกใช้ไปแล้วใน blueprint
+                // Check if any automations are already used in the blueprint
                 const usedIds = latestBlueprint.nodes.map(node => node.id);
                 setUsedAutomations(usedIds);
 
@@ -48,7 +49,15 @@ export default function BlueprintPage() {
         loadBlueprint();
     }, []);
 
-
+    // Update used automations when a blueprint is selected
+    const handleBlueprintSelect = (blueprintId: string) => {
+        const blueprint = blueprints.find(b => b.blueprint_id === blueprintId);
+        if (blueprint) {
+            const usedIds = blueprint.nodes.map(node => node.id);
+            setUsedAutomations(usedIds);  // Set the used automations for the selected blueprint
+            setCurrentBlueprint({ nodes: blueprint.nodes, edges: blueprint.edges });
+        }
+    };
 
     const handleAutomationUsed = (automationId: string) => {
         setUsedAutomations((prev) => [...prev, automationId]);
@@ -71,6 +80,7 @@ export default function BlueprintPage() {
                 onAutomationUsed={handleAutomationUsed}
                 onAutomationRemoved={handleAutomationRemoved}
                 blueprints={blueprints}
+                onBlueprintSelect={handleBlueprintSelect} // Pass the handler to sync the blueprint
             />
         </div>
     );
