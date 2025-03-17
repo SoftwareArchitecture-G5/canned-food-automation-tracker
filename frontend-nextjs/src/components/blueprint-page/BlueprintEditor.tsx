@@ -1,12 +1,6 @@
 "use client";
 
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import React, {useCallback, useState} from "react";
+import React, { useCallback, useState } from "react";
 import ReactFlow, {
     addEdge,
     applyEdgeChanges,
@@ -19,8 +13,8 @@ import ReactFlow, {
     EdgeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import {Button} from "@/components/ui/button";
-import {Trash2} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import {
     Command,
     CommandEmpty,
@@ -28,18 +22,26 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
-import {Check, ChevronsUpDown} from "lucide-react"
-import {cn} from "@/lib/utils"
-import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {Blueprint} from "@/type/blueprint";
+import { Blueprint } from "@/type/blueprint";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 
 interface Props {
     initialNodes: Node[];
@@ -50,14 +52,20 @@ interface Props {
     onBlueprintSelect: (blueprintId: string) => void; // New prop for blueprint selection
 }
 
-export default function BlueprintEditor({initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved, blueprints, onBlueprintSelect}: Props) {
+export default function BlueprintEditor({
+                                            initialNodes,
+                                            initialEdges,
+                                            onAutomationUsed,
+                                            onAutomationRemoved,
+                                            blueprints,
+                                            onBlueprintSelect,
+                                        }: Props) {
     const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
     const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [blueprintName, setBlueprintName] = useState("");
-    const [open, setOpen] = React.useState(false);
-    const [value, setValue] = React.useState("");
-
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState("");
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -92,16 +100,16 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
             id: automation.automation_id,
             type: "default",
             position,
-            data: {label: automation.name},
+            data: { label: automation.name },
         };
 
         setNodes((prev) => [...prev, newNode]);
-        onAutomationUsed(automation.automation_id); // แจ้งว่า automation ถูกใช้
+        onAutomationUsed(automation.automation_id); // Notify automation is used
     };
 
     const removeNode = (nodeId: string) => {
         setNodes((prev) => prev.filter((node) => node.id !== nodeId));
-        onAutomationRemoved(nodeId); // แจ้งว่า automation ถูกนำออก
+        onAutomationRemoved(nodeId); // Notify automation is removed
     };
 
     const handleSave = async () => {
@@ -135,6 +143,7 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
         >
             <div>
                 <div className="flex gap-4 mb-8">
+                    {/* Blueprint selection */}
                     <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                             <Button
@@ -146,24 +155,24 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                                 {value
                                     ? blueprints.find((blueprint) => blueprint.blueprint_id === value)?.name || "Select a blueprint..."
                                     : "Select a blueprint..."}
-                                <ChevronsUpDown className="opacity-50"/>
+                                <ChevronsUpDown className="opacity-50" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-[200px] p-0">
                             <Command>
-                                <CommandInput placeholder="Search Blueprint" className="h-9"/>
+                                <CommandInput placeholder="Search Blueprint" className="h-9" />
                                 <CommandList>
                                     <CommandEmpty>No Blueprint found.</CommandEmpty>
                                     <CommandGroup>
-                                        {blueprints.map((blueprint, index) => (
+                                        {blueprints.map((blueprint) => (
                                             <CommandItem
                                                 key={blueprint.blueprint_id}
-                                                value={blueprint.blueprint_id} // Correctly pass the ID to the value
+                                                value={blueprint.blueprint_id}
                                                 onSelect={() => {
                                                     setValue(blueprint.blueprint_id);
                                                     setNodes(blueprint.nodes);
                                                     setEdges(blueprint.edges);
-                                                    onBlueprintSelect(blueprint.blueprint_id); // Sync selected blueprint
+                                                    onBlueprintSelect(blueprint.blueprint_id);
                                                     setOpen(false);
                                                 }}
                                             >
@@ -182,16 +191,16 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                         </PopoverContent>
                     </Popover>
 
+                    {/* Save and Create New buttons */}
                     <Button onClick={() => console.log(value)}>Save</Button>
                     <Button onClick={() => setIsDialogOpen(true)}>Create New</Button>
 
-                    {/* ShadCN Dialog */}
+                    {/* Dialog for saving blueprint */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Save Blueprint</DialogTitle>
                             </DialogHeader>
-
                             <div className="flex flex-col gap-4">
                                 <Label htmlFor="blueprintName">Blueprint Name</Label>
                                 <Input
@@ -201,7 +210,6 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                                     placeholder="Enter blueprint name..."
                                 />
                             </div>
-
                             <DialogFooter>
                                 <DialogClose asChild>
                                     <Button variant="outline">Cancel</Button>
@@ -210,11 +218,13 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
+
+                    {/* Dropdown to remove nodes */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant={"outline"}>
                                 Remove
-                                <Trash2/>
+                                <Trash2 />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -226,8 +236,9 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-
             </div>
+
+            {/* ReactFlow component for visualizing nodes and edges */}
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -236,9 +247,8 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                 onConnect={onConnect}
                 fitView
             >
-                <Background/>
+                <Background />
             </ReactFlow>
-
         </div>
     );
 }
