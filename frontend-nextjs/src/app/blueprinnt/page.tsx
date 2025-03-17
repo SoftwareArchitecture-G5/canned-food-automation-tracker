@@ -11,7 +11,8 @@ const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/Bluepr
 });
 
 export default function BlueprintPage() {
-    const [blueprintData, setBlueprintData] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
+    const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
+    const [currentBlueprint, setCurrentBlueprint] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
     const [automations, setAutomations] = useState<{ automation_id: string; name: string }[]>([]);
     const [usedAutomations, setUsedAutomations] = useState<string[]>([]); // State สำหรับเก็บ automation ที่ถูกใช้ไปแล้ว
     const [loading, setLoading] = useState(true);
@@ -20,11 +21,14 @@ export default function BlueprintPage() {
         const loadBlueprint = async () => {
             try {
                 const data: Blueprint[] = await fetchBlueprintData();
+
+                setBlueprints(data);
+
                 const latestBlueprint = data.reduce((latest, current) =>
                         current.created_at > latest.created_at ? current : latest
                     , data[0]) || { nodes: [], edges: [] };
 
-                setBlueprintData(latestBlueprint);
+                setCurrentBlueprint(latestBlueprint);
 
                 // Fetch automation list
                 const automationResponse = await fetch("http://localhost:8000/automations");
@@ -62,10 +66,11 @@ export default function BlueprintPage() {
                 automations={automations.filter(a => !usedAutomations.includes(a.automation_id))}
             />
             <BlueprintEditor
-                initialEdges={blueprintData.edges}
-                initialNodes={blueprintData.nodes}
+                initialEdges={currentBlueprint.edges}
+                initialNodes={currentBlueprint.nodes}
                 onAutomationUsed={handleAutomationUsed}
                 onAutomationRemoved={handleAutomationRemoved}
+                blueprints={blueprints}
             />
         </div>
     );

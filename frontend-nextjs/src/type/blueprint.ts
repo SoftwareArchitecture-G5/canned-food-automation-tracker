@@ -1,5 +1,5 @@
 export interface Blueprint {
-    id: string;
+    blueprint_id: string;
     name: string;
     nodes: Nodes[];
     edges: Edges[];

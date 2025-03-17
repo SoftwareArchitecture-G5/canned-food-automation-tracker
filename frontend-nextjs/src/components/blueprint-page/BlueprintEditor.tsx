@@ -39,38 +39,17 @@ import {cn} from "@/lib/utils"
 import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import {Blueprint} from "@/type/blueprint";
 
 interface Props {
     initialNodes: Node[];
     initialEdges: Edge[];
     onAutomationUsed: (automationId: string) => void;
     onAutomationRemoved: (automationId: string) => void;
+    blueprints: Blueprint[];
 }
 
-const frameworks = [
-    {
-        value: "next.js",
-        label: "Next.js",
-    },
-    {
-        value: "sveltekit",
-        label: "SvelteKit",
-    },
-    {
-        value: "nuxt.js",
-        label: "Nuxt.js",
-    },
-    {
-        value: "remix",
-        label: "Remix",
-    },
-    {
-        value: "astro",
-        label: "Astro",
-    },
-]
-
-export default function BlueprintEditor({initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved}: Props) {
+export default function BlueprintEditor({initialNodes, initialEdges, onAutomationUsed, onAutomationRemoved, blueprints}: Props) {
     const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
     const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -163,7 +142,7 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                                 className="w-[200px] justify-between"
                             >
                                 {value
-                                    ? frameworks.find((framework) => framework.value === value)?.label
+                                    ? blueprints.find((blueprint) => blueprint.blueprint_id === value)?.name || "Select a blueprint..."
                                     : "Select a blueprint..."}
                                 <ChevronsUpDown className="opacity-50"/>
                             </Button>
@@ -174,20 +153,20 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                                 <CommandList>
                                     <CommandEmpty>No Blueprint found.</CommandEmpty>
                                     <CommandGroup>
-                                        {frameworks.map((framework) => (
+                                        {blueprints.map((blueprint, index) => (
                                             <CommandItem
-                                                key={framework.value}
-                                                value={framework.value}
-                                                onSelect={(currentValue) => {
-                                                    setValue(currentValue === value ? "" : currentValue)
-                                                    setOpen(false)
+                                                key={blueprint.blueprint_id}
+                                                value={blueprint.blueprint_id} // Correctly pass the ID to the value
+                                                onSelect={() => {
+                                                    setValue(blueprint.blueprint_id); // Set the ID as the value
+                                                    setOpen(false);
                                                 }}
                                             >
-                                                {framework.label}
+                                                {blueprint.name}
                                                 <Check
                                                     className={cn(
                                                         "ml-auto",
-                                                        value === framework.value ? "opacity-100" : "opacity-0"
+                                                        value === blueprint.blueprint_id ? "opacity-100" : "opacity-0"
                                                     )}
                                                 />
                                             </CommandItem>
@@ -197,7 +176,8 @@ export default function BlueprintEditor({initialNodes, initialEdges, onAutomatio
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <Button onClick={() => console.log("Save Blueprint")}>Save</Button>
+
+                    <Button onClick={() => console.log(value)}>Save</Button>
                     <Button onClick={() => setIsDialogOpen(true)}>Create New</Button>
 
                     {/* ShadCN Dialog */}
