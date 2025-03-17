@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { fetchBlueprintData } from "@/app/blueprinnt/action";
 import AutomationPanel from "@/components/blueprint-page/AutomationPanel";
+import {Blueprint} from "@/type/blueprint";
 
 const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/BlueprintEditor"), {
     ssr: false,
@@ -18,13 +19,22 @@ export default function BlueprintPage() {
     useEffect(() => {
         const loadBlueprint = async () => {
             try {
-                const data = await fetchBlueprintData();
-                setBlueprintData(data[0] || { nodes: [], edges: [] });
+                const data: Blueprint[] = await fetchBlueprintData();
+                const latestBlueprint = data.reduce((latest, current) =>
+                        current.created_at > latest.created_at ? current : latest
+                    , data[0]) || { nodes: [], edges: [] };
+
+                setBlueprintData(latestBlueprint);
 
                 // Fetch automation list
                 const automationResponse = await fetch("http://localhost:8000/automations");
                 const automationData = await automationResponse.json();
                 setAutomations(automationData);
+
+                // ตรวจสอบว่ามี automation ไหนถูกใช้ไปแล้วใน blueprint
+                const usedIds = latestBlueprint.nodes.map(node => node.id);
+                setUsedAutomations(usedIds);
+
             } catch (error) {
                 console.error("Error fetching blueprint data:", error);
             }
@@ -33,6 +43,8 @@ export default function BlueprintPage() {
 
         loadBlueprint();
     }, []);
+
+
 
     const handleAutomationUsed = (automationId: string) => {
         setUsedAutomations((prev) => [...prev, automationId]);
@@ -47,7 +59,7 @@ export default function BlueprintPage() {
     return (
         <div className="flex h-screen">
             <AutomationPanel
-                automations={automations.filter((a) => !usedAutomations.includes(a.automation_id))}
+                automations={automations.filter(a => !usedAutomations.includes(a.automation_id))}
             />
             <BlueprintEditor
                 initialEdges={blueprintData.edges}
