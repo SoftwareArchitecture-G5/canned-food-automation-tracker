@@ -11,6 +11,13 @@ import ReactFlow, {
     Connection,
     NodeChange,
     EdgeChange,
+    NodeProps,
+    NodeResizeControl,
+    NodeResizer,
+    Panel,
+    Handle,
+    Position,
+    Controls,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -43,14 +50,60 @@ import { Input } from "@/components/ui/input";
 import { Blueprint } from "@/type/blueprint";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 
+// Improved resizable node component with better vertical scaling
+const ResizableNode = ({ data, selected }: NodeProps) => {
+    return (
+        <>
+            {/* The outer div needs to take the full width and height of the node */}
+            <div className="w-full h-full relative">
+                {/* NodeResizer needs to be part of the DOM hierarchy */}
+                <NodeResizer
+                    minWidth={100}
+                    minHeight={50}
+                    isVisible={selected}
+                    lineClassName="border-blue-500"
+                    handleClassName="h-3 w-3 bg-blue-500 border border-white rounded"
+                    // Allow full expansion in height
+                    keepAspectRatio={false}
+                />
+
+                {/* Content container that fills all available space */}
+                <div className="absolute inset-0 border-2 rounded-md bg-white shadow-md flex flex-col">
+                    <Handle
+                        type="target"
+                        position={Position.Top}
+                        className="w-2 h-2 !bg-blue-400"
+                    />
+
+                    {/* Content that expands with the container */}
+                    <div className="p-2 overflow-auto w-full h-full flex items-center justify-center">
+                        {data.label}
+                    </div>
+
+                    <Handle
+                        type="source"
+                        position={Position.Bottom}
+                        className="w-2 h-2 !bg-blue-400"
+                    />
+                </div>
+            </div>
+        </>
+    );
+};
+
 interface Props {
     initialNodes: Node[];
     initialEdges: Edge[];
     onAutomationUsed: (automationId: string) => void;
     onAutomationRemoved: (automationId: string) => void;
     blueprints: Blueprint[];
-    onBlueprintSelect: (blueprintId: string) => void; // New prop for blueprint selection
+    onBlueprintSelect: (blueprintId: string) => void;
 }
+
+// Define the node types
+const nodeTypes = {
+    resizable: ResizableNode,
+};
 
 export default function BlueprintEditor({
                                             initialNodes,
@@ -60,7 +113,14 @@ export default function BlueprintEditor({
                                             blueprints,
                                             onBlueprintSelect,
                                         }: Props) {
-    const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
+    const [nodes, setNodes] = useState<Node[]>(
+        initialNodes?.map(node => ({
+            ...node,
+            type: 'resizable', // Set the node type to our custom resizable type
+            // Add default size if not present
+            style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
+        })) || []
+    );
     const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [blueprintName, setBlueprintName] = useState("");
@@ -98,18 +158,19 @@ export default function BlueprintEditor({
 
         const newNode: Node = {
             id: automation.automation_id,
-            type: "default",
+            type: "resizable", // Use our custom resizable node type
             position,
             data: { label: automation.name },
+            style: { width: 180, height: 80 }, // Default size
         };
 
         setNodes((prev) => [...prev, newNode]);
-        onAutomationUsed(automation.automation_id); // Notify automation is used
+        onAutomationUsed(automation.automation_id);
     };
 
     const removeNode = (nodeId: string) => {
         setNodes((prev) => prev.filter((node) => node.id !== nodeId));
-        onAutomationRemoved(nodeId); // Notify automation is removed
+        onAutomationRemoved(nodeId);
     };
 
     const onNodesDelete = useCallback(
@@ -141,6 +202,22 @@ export default function BlueprintEditor({
             setIsDialogOpen(false);
         } catch (error) {
             console.error("Error saving blueprint:", error);
+        }
+    };
+
+    const handleLoadBlueprint = (blueprintId: string) => {
+        const selectedBlueprint = blueprints.find(bp => bp.blueprint_id === blueprintId);
+        if (selectedBlueprint) {
+            // Convert nodes to resizable type
+            const resizableNodes = selectedBlueprint.nodes.map(node => ({
+                ...node,
+                type: 'resizable',
+                style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
+            }));
+
+            setNodes(resizableNodes);
+            setEdges(selectedBlueprint.edges);
+            onBlueprintSelect(blueprintId);
         }
     };
 
@@ -179,9 +256,7 @@ export default function BlueprintEditor({
                                                 value={blueprint.blueprint_id}
                                                 onSelect={() => {
                                                     setValue(blueprint.blueprint_id);
-                                                    setNodes(blueprint.nodes);
-                                                    setEdges(blueprint.edges);
-                                                    onBlueprintSelect(blueprint.blueprint_id);
+                                                    handleLoadBlueprint(blueprint.blueprint_id);
                                                     setOpen(false);
                                                 }}
                                             >
@@ -255,9 +330,11 @@ export default function BlueprintEditor({
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodesDelete={onNodesDelete}
+                nodeTypes={nodeTypes}
                 fitView
             >
                 <Background />
+                <Controls />
             </ReactFlow>
         </div>
     );
