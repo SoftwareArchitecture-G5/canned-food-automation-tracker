@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import ReactFlow, {
     addEdge,
     applyEdgeChanges,
@@ -12,16 +12,17 @@ import ReactFlow, {
     NodeChange,
     EdgeChange,
     NodeProps,
-    NodeResizeControl,
     NodeResizer,
-    Panel,
     Handle,
     Position,
     Controls,
+    NodeMouseHandler,
+    useReactFlow,
+    ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit, Copy, Trash, ArrowUpDown } from "lucide-react";
 import {
     Command,
     CommandEmpty,
@@ -48,10 +49,117 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Blueprint } from "@/type/blueprint";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
-// Improved resizable node component with better vertical scaling
-const ResizableNode = ({ data, selected }: NodeProps) => {
+interface ContextMenuProps {
+    nodeId: string;
+    top: number;
+    left: number;
+    onClose: () => void;
+    onEdit: () => void;
+    onDelete: () => void;
+    onDuplicate: () => void;
+    onBringToFront: () => void;
+}
+
+const ContextMenu = ({
+                         nodeId,
+                         top,
+                         left,
+                         onClose,
+                         onEdit,
+                         onDelete,
+                         onDuplicate,
+                         onBringToFront,
+                     }: ContextMenuProps) => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    // Click outside to close the menu
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            // Check if the click is outside the menu
+            if (ref.current && !ref.current.contains(event.target as unknown as globalThis.Node)) {
+                onClose();
+            }
+        };
+
+        // Add event listener to document for all clicks
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Add event listener for Escape key
+        const handleEscapeKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+        document.addEventListener("keydown", handleEscapeKey);
+
+        // Clean up event listeners when component unmounts
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleEscapeKey);
+        };
+    }, [onClose]);
+
+    return (
+        <div
+            ref={ref}
+            style={{
+                position: "absolute",
+                top,
+                left,
+                zIndex: 1000,
+            }}
+            className="bg-white rounded-md shadow-lg border border-gray-200 w-56 py-1"
+        >
+            <div className="px-2 py-1.5 text-sm font-semibold border-b border-gray-100 flex justify-between">
+                <span>Node Options</span>
+                <button
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={onClose}
+                >
+                    ✕
+                </button>
+            </div>
+            <div className="py-1">
+                <button
+                    onClick={onEdit}
+                    className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                >
+                    <Edit className="w-4 h-4 mr-2" /> Edit Node
+                </button>
+                <button
+                    onClick={onDuplicate}
+                    className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                >
+                    <Copy className="w-4 h-4 mr-2" /> Duplicate
+                </button>
+                <button
+                    onClick={onBringToFront}
+                    className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                >
+                    <ArrowUpDown className="w-4 h-4 mr-2" /> Bring to Front
+                </button>
+                <div className="border-t border-gray-100 my-1"></div>
+                <button
+                    onClick={onDelete}
+                    className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                    <Trash className="w-4 h-4 mr-2" /> Delete
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// Improved resizable node component with context menu support
+const ResizableNode = ({ id, data, selected }: NodeProps) => {
     return (
         <>
             {/* The outer div needs to take the full width and height of the node */}
@@ -68,7 +176,10 @@ const ResizableNode = ({ data, selected }: NodeProps) => {
                 />
 
                 {/* Content container that fills all available space */}
-                <div className="absolute inset-0 border-2 rounded-md bg-white shadow-md flex flex-col">
+                <div
+                    className="absolute inset-0 border-2 rounded-md bg-white shadow-md flex flex-col"
+                    data-nodeid={id} // Add data attribute for node identification
+                >
                     <Handle
                         type="target"
                         position={Position.Top}
@@ -91,33 +202,24 @@ const ResizableNode = ({ data, selected }: NodeProps) => {
     );
 };
 
-interface Props {
-    initialNodes: Node[];
-    initialEdges: Edge[];
-    onAutomationUsed: (automationId: string) => void;
-    onAutomationRemoved: (automationId: string) => void;
-    blueprints: Blueprint[];
-    onBlueprintSelect: (blueprintId: string) => void;
-}
-
 // Define the node types
 const nodeTypes = {
     resizable: ResizableNode,
 };
 
-export default function BlueprintEditor({
-                                            initialNodes,
-                                            initialEdges,
-                                            onAutomationUsed,
-                                            onAutomationRemoved,
-                                            blueprints,
-                                            onBlueprintSelect,
-                                        }: Props) {
+// Flow Editor Component - Wraps the actual editor
+const FlowEditor = ({
+                        initialNodes,
+                        initialEdges,
+                        onAutomationUsed,
+                        onAutomationRemoved,
+                        blueprints,
+                        onBlueprintSelect,
+                    }: Props) => {
     const [nodes, setNodes] = useState<Node[]>(
         initialNodes?.map(node => ({
             ...node,
-            type: 'resizable', // Set the node type to our custom resizable type
-            // Add default size if not present
+            type: 'resizable',
             style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
         })) || []
     );
@@ -126,6 +228,21 @@ export default function BlueprintEditor({
     const [blueprintName, setBlueprintName] = useState("");
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
+
+    // Context menu state
+    const [contextMenu, setContextMenu] = useState<{
+        nodeId: string;
+        top: number;
+        left: number;
+        visible: boolean;
+    } | null>(null);
+
+    // Edit node dialog state
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editNodeId, setEditNodeId] = useState<string | null>(null);
+    const [editNodeLabel, setEditNodeLabel] = useState("");
+
+    const { getNode, setNodes: setFlowNodes } = useReactFlow();
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -158,10 +275,10 @@ export default function BlueprintEditor({
 
         const newNode: Node = {
             id: automation.automation_id,
-            type: "resizable", // Use our custom resizable node type
+            type: "resizable",
             position,
             data: { label: automation.name },
-            style: { width: 180, height: 80 }, // Default size
+            style: { width: 180, height: 80 },
         };
 
         setNodes((prev) => [...prev, newNode]);
@@ -208,7 +325,6 @@ export default function BlueprintEditor({
     const handleLoadBlueprint = (blueprintId: string) => {
         const selectedBlueprint = blueprints.find(bp => bp.blueprint_id === blueprintId);
         if (selectedBlueprint) {
-            // Convert nodes to resizable type
             const resizableNodes = selectedBlueprint.nodes.map(node => ({
                 ...node,
                 type: 'resizable',
@@ -221,11 +337,114 @@ export default function BlueprintEditor({
         }
     };
 
+    // Context Menu Handlers
+    const onNodeContextMenu: NodeMouseHandler = (event, node) => {
+        // Prevent default context menu
+        event.preventDefault();
+
+        // Get the position for the context menu
+        const rect = event.currentTarget.getBoundingClientRect();
+        setContextMenu({
+            nodeId: node.id,
+            top: event.clientY - rect.top,
+            left: event.clientX - rect.left,
+            visible: true,
+        });
+    };
+
+    const closeContextMenu = () => {
+        setContextMenu(null);
+    };
+
+    const handleEditNode = () => {
+        if (contextMenu) {
+            const node = nodes.find(n => n.id === contextMenu.nodeId);
+            if (node) {
+                setEditNodeId(node.id);
+                setEditNodeLabel(node.data.label);
+                setIsEditDialogOpen(true);
+                closeContextMenu();
+            }
+        }
+    };
+
+    const handleDeleteNode = () => {
+        if (contextMenu) {
+            removeNode(contextMenu.nodeId);
+            closeContextMenu();
+        }
+    };
+
+    const handleDuplicateNode = () => {
+        if (contextMenu) {
+            const node = nodes.find(n => n.id === contextMenu.nodeId);
+            if (node) {
+                const newNode = {
+                    ...node,
+                    id: `${node.id}-copy-${Date.now()}`,
+                    position: {
+                        x: node.position.x + 20,
+                        y: node.position.y + 20,
+                    },
+                };
+                setNodes((prev) => [...prev, newNode]);
+                closeContextMenu();
+            }
+        }
+    };
+
+    const handleBringToFront = () => {
+        if (contextMenu) {
+            // Bring the node to front by removing it and adding it back
+            // This works because ReactFlow renders nodes in the order they appear in the array
+            setNodes((nds) => {
+                const nodeIndex = nds.findIndex(n => n.id === contextMenu.nodeId);
+                if (nodeIndex !== -1) {
+                    const node = nds[nodeIndex];
+                    return [
+                        ...nds.slice(0, nodeIndex),
+                        ...nds.slice(nodeIndex + 1),
+                        node,
+                    ];
+                }
+                return nds;
+            });
+            closeContextMenu();
+        }
+    };
+
+    const handleSaveNodeEdit = () => {
+        if (editNodeId) {
+            setNodes((nds) =>
+                nds.map((node) =>
+                    node.id === editNodeId
+                        ? { ...node, data: { ...node.data, label: editNodeLabel } }
+                        : node
+                )
+            );
+            setIsEditDialogOpen(false);
+            setEditNodeId(null);
+            setEditNodeLabel("");
+        }
+    };
+
+    // Prevent default browser context menu on the ReactFlow container
+    const onPaneContextMenu = (event: React.MouseEvent) => {
+        event.preventDefault();
+    };
+
+    const onPaneClick = useCallback(() => {
+        // Close context menu when clicking on the pane
+        if (contextMenu) {
+            closeContextMenu();
+        }
+    }, [contextMenu, closeContextMenu]);
+
     return (
         <div
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
-            className="w-full h-4/5 mx-6"
+            className="w-full h-4/5 mx-6 relative"
         >
             <div>
                 <div className="flex gap-4 mb-8">
@@ -303,6 +522,30 @@ export default function BlueprintEditor({
                         </DialogContent>
                     </Dialog>
 
+                    {/* Dialog for editing node */}
+                    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Edit Node</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex flex-col gap-4">
+                                <Label htmlFor="nodeLabel">Node Label</Label>
+                                <Input
+                                    id="nodeLabel"
+                                    value={editNodeLabel}
+                                    onChange={(e) => setEditNodeLabel(e.target.value)}
+                                    placeholder="Enter node label..."
+                                />
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onClick={handleSaveNodeEdit}>Save</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
                     {/* Dropdown to remove nodes */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -323,19 +566,56 @@ export default function BlueprintEditor({
             </div>
 
             {/* ReactFlow component for visualizing nodes and edges */}
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onNodesDelete={onNodesDelete}
-                nodeTypes={nodeTypes}
-                fitView
-            >
-                <Background />
-                <Controls />
-            </ReactFlow>
+            <div className="relative w-full h-full">
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onNodesDelete={onNodesDelete}
+                    nodeTypes={nodeTypes}
+                    onNodeContextMenu={onNodeContextMenu}
+                    onPaneContextMenu={onPaneContextMenu}
+                    onPaneClick={onPaneClick}
+                    fitView
+                >
+                    <Background />
+                    <Controls />
+                </ReactFlow>
+
+                {/* Context Menu */}
+                {contextMenu && contextMenu.visible && (
+                    <ContextMenu
+                        nodeId={contextMenu.nodeId}
+                        top={contextMenu.top}
+                        left={contextMenu.left}
+                        onClose={closeContextMenu}
+                        onEdit={handleEditNode}
+                        onDelete={handleDeleteNode}
+                        onDuplicate={handleDuplicateNode}
+                        onBringToFront={handleBringToFront}
+                    />
+                )}
+            </div>
         </div>
+    );
+};
+
+interface Props {
+    initialNodes: Node[];
+    initialEdges: Edge[];
+    onAutomationUsed: (automationId: string) => void;
+    onAutomationRemoved: (automationId: string) => void;
+    blueprints: Blueprint[];
+    onBlueprintSelect: (blueprintId: string) => void;
+}
+
+// Main component that wraps the editor with ReactFlowProvider
+export default function BlueprintEditor(props: Props) {
+    return (
+        <ReactFlowProvider>
+            <FlowEditor {...props} />
+        </ReactFlowProvider>
     );
 }
