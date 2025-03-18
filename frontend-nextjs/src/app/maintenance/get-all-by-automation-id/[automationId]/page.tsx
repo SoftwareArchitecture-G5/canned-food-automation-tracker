@@ -1,15 +1,23 @@
 "use client"
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { Dialog, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
-import { Maintenance } from "@/type/maintenance";
+import {Label} from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {useEffect, useState} from "react";
+import {
+    Dialog,
+    DialogClose,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter
+} from "@/components/ui/dialog";
+import {Table, TableHeader, TableRow, TableHead, TableBody, TableCell} from "@/components/ui/table";
+import {Select, SelectItem, SelectTrigger, SelectContent} from "@/components/ui/select";
+import {Maintenance} from "@/type/maintenance";
 
 
-export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
+export default function MaintenancePage({params}: { params: Promise<{ automationId: string }> }) {
     const [search, setSearch] = useState("");
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const [automationId, setAutomationId] = useState<string | null>(null);
@@ -30,7 +38,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                 const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}`;
                 try {
                     const response = await fetch(url, {
-                        headers: { "Content-Type": "application/json" },
+                        headers: {"Content-Type": "application/json"},
                         method: "GET",
                         credentials: "include",
                     });
@@ -57,27 +65,27 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-    
+
         const formData = new FormData(event.target as HTMLFormElement);
         const issueReport = formData.get("issue_report") as string;
         const date = formData.get("date") as string;
-    
+
         const newMaintenance = {
             issue_report: issueReport,
             date: date,
             status: "pending",
             automation_id: automationId,
         };
-    
+
         const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/`;
         try {
             const response = await fetch(url, {
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 method: "POST",
                 credentials: "include",
                 body: JSON.stringify(newMaintenance),
             });
-    
+
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             const data = await response.json();
             console.log("Maintenance created:", data);
@@ -85,7 +93,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
         } catch (error) {
             console.error("Error creating maintenance:", error);
         }
-    
+
         console.log("Form submitted");
     };
 
@@ -96,7 +104,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                 const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/${maintenanceId}`;
                 const response = await fetch(url, {
                     method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {"Content-Type": "application/json"},
                     credentials: "include",
                 });
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -129,20 +137,20 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
         const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/${editData?.maintenance_id}`;
 
         try {
-        const response = await fetch(url, {
-            headers: { "Content-Type": "application/json" },
-            method: "PATCH",
-            credentials: "include",
-            body: JSON.stringify(updatedMaintenance),
-        });
+            const response = await fetch(url, {
+                headers: {"Content-Type": "application/json"},
+                method: "PATCH",
+                credentials: "include",
+                body: JSON.stringify(updatedMaintenance),
+            });
 
-        console.log(JSON.stringify(updatedMaintenance))
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const data = await response.json();
-        console.log("Maintenance updated:", data);
-        setIsOpen(false); // Close the dialog
+            console.log(JSON.stringify(updatedMaintenance))
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            const data = await response.json();
+            console.log("Maintenance updated:", data);
+            setIsOpen(false); // Close the dialog
         } catch (error) {
-        console.error("Error updating maintenance:", error);
+            console.error("Error updating maintenance:", error);
         }
     };
 
@@ -171,11 +179,11 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <Label htmlFor="issue_report">Issue</Label>
-                            <Input id="issue_report" name="issue_report" type="text" required />
+                            <Input id="issue_report" name="issue_report" type="text" required/>
                         </div>
                         <div>
                             <Label htmlFor="date">Date</Label>
-                            <Input id="date" name="date" type="date" required />
+                            <Input id="date" name="date" type="date" required/>
                         </div>
                         <DialogFooter>
                             <Button type="submit">Submit</Button>
@@ -209,64 +217,66 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                             <TableCell>{item.status}</TableCell>
                             <TableCell>{item.automation.name}</TableCell>
                             <TableCell>
-                                <Button 
-                                    onClick={() => handleEdit(item)} 
+                                <Button
+                                    onClick={() => handleEdit(item)}
                                     variant="outline"
                                     className="mr-2"
                                 >
                                     Edit
                                 </Button>
 
-                                 {/* Dialog for editing */}
+                                {/* Dialog for editing */}
                                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                     <DialogContent>
-                                    <DialogTitle>Edit Maintenance</DialogTitle>
-                                    <form onSubmit={handleUpdate}>
-                                        {/* Issue Report */}
-                                        <div>
-                                        <Label htmlFor="issue_report">Issue Report</Label>
-                                        <Input
-                                            id="issue_report"
-                                            name="issue_report"
-                                            type="text"
-                                            required
-                                            defaultValue={editData?.issue_report || ""}
-                                        />
-                                        </div>
+                                        <DialogTitle>Edit Maintenance</DialogTitle>
+                                        <form onSubmit={handleUpdate}>
+                                            {/* Issue Report */}
+                                            <div>
+                                                <Label htmlFor="issue_report">Issue Report</Label>
+                                                <Input
+                                                    id="issue_report"
+                                                    name="issue_report"
+                                                    type="text"
+                                                    required
+                                                    defaultValue={editData?.issue_report || ""}
+                                                />
+                                            </div>
 
-                                        {/* Date */}
-                                        <div>
-                                        <Label htmlFor="date">Date</Label>
-                                        <Input
-                                            id="date"
-                                            name="date"
-                                            type="date"
-                                            required
-                                            defaultValue={editData?.date || ""}
-                                        />
-                                        </div>
+                                            {/* Date */}
+                                            <div>
+                                                <Label htmlFor="date">Date</Label>
+                                                <Input
+                                                    id="date"
+                                                    name="date"
+                                                    type="date"
+                                                    required
+                                                    defaultValue={editData?.date || ""}
+                                                />
+                                            </div>
 
-                                        {/* Status */}
-                                        <div>
-                                        <Label htmlFor="status">Status</Label>
-                                        <Select id="status" name="status" defaultValue={editData?.status || "pending"} required>
-                                            <SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="pending">Pending</SelectItem>
-                                                <SelectItem value="resolved">Resolved</SelectItem>
-                                            </SelectContent>
-                                            </SelectTrigger>
-                                        </Select>
-                                        </div>
+                                            {/* Status */}
+                                            <div>
+                                                <Label htmlFor="status">Status</Label>
+                                                <Select name="status"
+                                                        defaultValue={editData?.status || "pending"} required>
+                                                    <SelectTrigger>
+                                                        {editData?.status || "pending"}
+                                                        <SelectContent>
+                                                            <SelectItem value="pending">Pending</SelectItem>
+                                                            <SelectItem value="completed">Completed</SelectItem>
+                                                        </SelectContent>
+                                                    </SelectTrigger>
+                                                </Select>
+                                            </div>
 
-                                        <DialogFooter>
-                                        <Button type="submit">Update Maintenance</Button>
-                                        </DialogFooter>
-                                    </form>
+                                            <DialogFooter>
+                                                <Button type="submit">Update Maintenance</Button>
+                                            </DialogFooter>
+                                        </form>
                                     </DialogContent>
-                                </Dialog>                
+                                </Dialog>
                                 <Button
-                                    onClick={() => handleDelete(item.maintenance_id)} 
+                                    onClick={() => handleDelete(item.maintenance_id)}
                                     variant="destructive"
                                 >
                                     Delete

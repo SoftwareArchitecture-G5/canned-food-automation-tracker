@@ -5,7 +5,7 @@ export enum MaintenanceStatus {
     "PENDING" = "pending",
 }
 
-export type Maintenance = {
+export interface Maintenance {
     maintenance_id: string;
     issue_report: string;
     date: string;

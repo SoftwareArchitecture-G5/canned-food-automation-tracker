@@ -18,9 +18,9 @@ export const Navbar = () => {
 
             </div>
             <div className="flex flex-col sm:flex-row space-x-4 items-center">
-                <Link href="#" className="">Home</Link>
-                <Link href="#" className="">Automation</Link>
-                <Link href="#" className="">Blueprint</Link>
+                <Link href="/" className="">Home</Link>
+                <Link href="/automations" className="">Automations</Link>
+                <Link href="/blueprint" className="">Blueprint</Link>
                 <Link href="/calendar" className="">Calendar</Link>
 
                 <SignedOut>
