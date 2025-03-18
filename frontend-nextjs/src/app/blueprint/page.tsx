@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { fetchBlueprintData } from "@/app/blueprint/action";
 import AutomationPanel from "@/components/blueprint-page/AutomationPanel";
 import { Blueprint } from "@/type/blueprint";
+import {Node, Edge} from "reactflow";
 
 const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/BlueprintEditor"), {
     ssr: false,
@@ -12,7 +13,7 @@ const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/Bluepr
 
 export default function BlueprintPage() {
     const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
-    const [currentBlueprint, setCurrentBlueprint] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
+    const [currentBlueprint, setCurrentBlueprint] = useState<{ nodes: Node[]; edges: Edge[] }>({ nodes: [], edges: [] });
     const [automations, setAutomations] = useState<{ automation_id: string; name: string }[]>([]);
     const [usedAutomations, setUsedAutomations] = useState<string[]>([]); // State for used automations
     const [loading, setLoading] = useState(true);

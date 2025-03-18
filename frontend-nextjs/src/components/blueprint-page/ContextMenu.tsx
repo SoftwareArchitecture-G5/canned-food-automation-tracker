@@ -13,7 +13,6 @@ interface ContextMenuProps {
 }
 
 const ContextMenu = ({
-                         nodeId,
                          top,
                          left,
                          onClose,

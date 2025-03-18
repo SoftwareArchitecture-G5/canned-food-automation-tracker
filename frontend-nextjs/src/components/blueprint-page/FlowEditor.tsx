@@ -67,8 +67,6 @@ const FlowEditor = ({
     const [editNodeId, setEditNodeId] = useState<string | null>(null);
     const [editNodeLabel, setEditNodeLabel] = useState("");
 
-    const { setNodes: setFlowNodes } = useReactFlow();
-
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
         []

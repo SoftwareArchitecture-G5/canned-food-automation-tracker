@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 
-import { AutomationStatus } from "@/type/automation";
+import {Automation, AutomationStatus} from "@/type/automation";
 
 const formSchema = z.object({
   name: z
@@ -57,7 +57,7 @@ interface EditAutomationFormProps {
     description: string;
     status: AutomationStatus;
   };
-  onAutomationUpdated: (updatedAutomation: any) => void;
+  onAutomationUpdated: (updatedAutomation: Automation) => void;
   onClose: () => void;
 }
 
