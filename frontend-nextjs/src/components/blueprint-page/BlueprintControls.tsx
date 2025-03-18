@@ -46,61 +46,63 @@ const BlueprintControls = ({
     const [open, setOpen] = React.useState(false);
 
     return (
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-4 mb-8 justify-between items-center">
             {/* Blueprint selection */}
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-[200px] justify-between"
-                    >
-                        {selectedBlueprintId
-                            ? blueprints.find((blueprint) => blueprint.blueprint_id === selectedBlueprintId)?.name || "Select a blueprint..."
-                            : "Select a blueprint..."}
-                        <ChevronsUpDown className="opacity-50" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                    <Command>
-                        <CommandInput placeholder="Search Blueprint" className="h-9" />
-                        <CommandList>
-                            <CommandEmpty>No Blueprint found.</CommandEmpty>
-                            <CommandGroup>
-                                {blueprints.map((blueprint) => (
-                                    <CommandItem
-                                        key={blueprint.blueprint_id}
-                                        value={blueprint.blueprint_id}
-                                        onSelect={() => {
-                                            onBlueprintSelect(blueprint.blueprint_id);
-                                            setOpen(false);
-                                        }}
-                                    >
-                                        {blueprint.name}
-                                        <Check
-                                            className={cn(
-                                                "ml-auto",
-                                                selectedBlueprintId === blueprint.blueprint_id ? "opacity-100" : "opacity-0"
-                                            )}
-                                        />
-                                    </CommandItem>
-                                ))}
-                            </CommandGroup>
-                        </CommandList>
-                    </Command>
-                </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-2">
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-[200px] justify-between"
+                        >
+                            {selectedBlueprintId
+                                ? blueprints.find((blueprint) => blueprint.blueprint_id === selectedBlueprintId)?.name || "Select a blueprint..."
+                                : "Select a blueprint..."}
+                            <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                            <CommandInput placeholder="Search Blueprint" className="h-9" />
+                            <CommandList>
+                                <CommandEmpty>No Blueprint found.</CommandEmpty>
+                                <CommandGroup>
+                                    {blueprints.map((blueprint) => (
+                                        <CommandItem
+                                            key={blueprint.blueprint_id}
+                                            value={blueprint.blueprint_id}
+                                            onSelect={() => {
+                                                onBlueprintSelect(blueprint.blueprint_id);
+                                                setOpen(false);
+                                            }}
+                                        >
+                                            {blueprint.name}
+                                            <Check
+                                                className={cn(
+                                                    "ml-auto",
+                                                    selectedBlueprintId === blueprint.blueprint_id ? "opacity-100" : "opacity-0"
+                                                )}
+                                            />
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
 
-            {/* Save and Create New buttons */}
-            <Button onClick={onSave}>Save</Button>
-            <Button onClick={onCreateNew}>Create New</Button>
+                {/* Save and Create New buttons */}
+                <Button onClick={onSave}>Save</Button>
+                <Button onClick={onCreateNew}>Create New</Button>
+            </div>
 
             {/* Dropdown to remove nodes */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant={"outline"}>
-                        Remove
+                        Remove Automation In Flow
                         <Trash2 />
                     </Button>
                 </DropdownMenuTrigger>
