@@ -112,6 +112,15 @@ export default function BlueprintEditor({
         onAutomationRemoved(nodeId); // Notify automation is removed
     };
 
+    const onNodesDelete = useCallback(
+        (deletedNodes: Node[]) => {
+            deletedNodes.forEach((node) => {
+                onAutomationRemoved(node.id);
+            });
+        },
+        [onAutomationRemoved]
+    );
+
     const handleSave = async () => {
         if (!blueprintName) {
             alert("Please enter a blueprint name!");
@@ -245,6 +254,7 @@ export default function BlueprintEditor({
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+                onNodesDelete={onNodesDelete}
                 fitView
             >
                 <Background />
