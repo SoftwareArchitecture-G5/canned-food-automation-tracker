@@ -3,12 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import {Maintenance} from "@/type/maintenance";
 
-interface Maintenance {
-  maintenance_id: string;
-  issue_report: string;
-  date: string; // Ensure this is a string in YYYY-MM-DD format
-}
+
 
 export default function MaintenanceCalendar() {
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
@@ -38,15 +35,15 @@ export default function MaintenanceCalendar() {
     useEffect(() => {
         if (calendarRef.current && maintenanceData.length > 0) {
             const events = maintenanceData.map((maintenance) => ({
-                title: maintenance.issue_report || "No Issue Reported",
-                start: maintenance.date, // Ensure this is formatted correctly
+                title: maintenance.automation?.name || "No Automation Name",
+                start: maintenance.date,
                 id: maintenance.maintenance_id,
             }));
-
+    
             const calendar = new Calendar(calendarRef.current, {
                 plugins: [dayGridPlugin],
                 initialView: "dayGridMonth",
-                events: events, // Pass the mapped events
+                events: events,
             });
 
             calendar.render();

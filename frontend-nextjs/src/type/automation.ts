@@ -2,6 +2,7 @@ export enum AutomationStatus {
     "ACTIVE" = "active",
     "INACTIVE" = "inactive",
 }
+
 export interface Automation {
     automation_id: string;
     name: string;
@@ -9,5 +10,4 @@ export interface Automation {
     status: AutomationStatus;
     created_at: string;
     updated_at: string;
-
 }

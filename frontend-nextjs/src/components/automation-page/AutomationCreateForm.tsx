@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import {Automation} from "@/type/automation";
 
 const formSchema = z.object({
     name: z
@@ -30,7 +31,7 @@ const formSchema = z.object({
         }),
 });
 
-export function CreateAutomationForm({ onAutomationCreated }: { onAutomationCreated: (automation: any) => void }) {
+export function CreateAutomationForm({ onAutomationCreated }: { onAutomationCreated: (automation: Automation) => void }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
