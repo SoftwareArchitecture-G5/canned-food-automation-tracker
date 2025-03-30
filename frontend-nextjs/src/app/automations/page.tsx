@@ -1,4 +1,5 @@
 "use client"
+
 import { AutomationTable } from "@/components/automation-page/AutomationTable";
 import { CreateAutomationForm } from "@/components/automation-page/AutomationCreateForm";
 import {
@@ -17,34 +18,43 @@ import { getAutomations } from "./action";
 
 export default function AutomationPage() {
     const [automations, setAutomations] = useState<Automation[]>([]);
-    const [loading, isLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const limit = 10;
 
     useEffect(() => {
         async function fetchData() {
+            setLoading(true);
             try {
-                const automationData = await getAutomations();
-                setAutomations(automationData);
+                const result = await getAutomations(currentPage, limit);
+                setAutomations(result.data);
+                setTotal(result.total);
             } catch (error) {
                 console.error("Error loading automations", error);
             } finally {
-                isLoading(false);
+                setLoading(false);
             }
         }
 
         fetchData();
-    }, []);
+    }, [currentPage]);
 
     const handleAutomationCreated = (newAutomation: Automation) => {
-        setAutomations((prev) => [...prev, newAutomation]);
+        setAutomations((prev) => [newAutomation, ...prev]);
+        setTotal((prev) => prev + 1);
     };
 
+    const totalPages = Math.ceil(total / limit);
+
     if (loading) {
-        return <div>Loading automations...</div>
+        return <div>Loading automations...</div>;
     }
 
     return (
-        <div>
+        <div className="space-y-6">
             <div className="text-xl font-bold">Automations management</div>
+
             <Dialog>
                 <DialogTrigger asChild>
                     <Button variant={"default"}>
@@ -60,7 +70,29 @@ export default function AutomationPage() {
                     <CreateAutomationForm onAutomationCreated={handleAutomationCreated} />
                 </DialogContent>
             </Dialog>
+
             <AutomationTable automationsData={automations} />
+
+            {/* Pagination controls */}
+            <div className="flex items-center justify-center gap-4 pt-4">
+                <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </Button>
+                <span>
+                    Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </Button>
+            </div>
         </div>
     );
 }
