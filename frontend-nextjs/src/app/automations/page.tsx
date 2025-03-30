@@ -13,25 +13,25 @@ import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
 import { Automation } from "@/type/automation";
 import { useState, useEffect } from "react";
+import { getAutomations } from "./action";
 
 export default function AutomationPage() {
     const [automations, setAutomations] = useState<Automation[]>([]);
     const [loading, isLoading] = useState(true)
 
     useEffect(() => {
-        async function fetchAutomations() {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`, {
-                headers: { "Content-Type": "application/json" },
-                method: "GET",
-                credentials: "include",
-            });
-            const automationData: Automation[] = await response.json();
-            setAutomations(automationData);
-            isLoading(false)
+        async function fetchData() {
+            try {
+                const automationData = await getAutomations();
+                setAutomations(automationData);
+            } catch (error) {
+                console.error("Error loading automations", error);
+            } finally {
+                isLoading(false);
+            }
         }
-        
 
-        fetchAutomations();
+        fetchData();
     }, []);
 
     const handleAutomationCreated = (newAutomation: Automation) => {
