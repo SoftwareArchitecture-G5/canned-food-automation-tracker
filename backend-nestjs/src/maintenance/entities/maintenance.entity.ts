@@ -10,8 +10,11 @@ export class Maintenance {
     @PrimaryGeneratedColumn('uuid')
     maintenance_id: string;
 
-    @ManyToOne(()=> Automation, (Automation) => Automation.maintenances, {nullable: false})
-    @JoinColumn({name: 'automation_id'})
+    @ManyToOne(() => Automation, (automation) => automation.maintenances, {
+        nullable: true,
+        onDelete: 'SET NULL',
+    })
+    @JoinColumn({ name: 'automation_id' })
     automation: Automation;
 
     @Column({type: 'varchar', nullable: true, length: 100})
