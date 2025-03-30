@@ -2,12 +2,11 @@
 
 import { Automation, AutomationStatus } from "@/type/automation";
 
-export async function getAutomations(): Promise<Automation[]> {
+export async function getAutomations(page: number, limit: number) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`,
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations?page=${page}&limit=${limit}`,
     {
       headers: { "Content-Type": "application/json" },
-      method: "GET",
       credentials: "include",
       cache: "no-store",
     }
@@ -17,8 +16,7 @@ export async function getAutomations(): Promise<Automation[]> {
     throw new Error("Failed to fetch automations");
   }
 
-  const data: Automation[] = await response.json();
-  return data;
+  return await response.json();
 }
 
 export async function deleteAutomation(id: string): Promise<boolean> {
