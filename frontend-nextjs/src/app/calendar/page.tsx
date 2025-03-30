@@ -3,14 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import {Maintenance} from "@/type/maintenance";
 
-interface Maintenance {
-  maintenance_id: string;
-  issue_report: string;
-  date: string; // Ensure this is a string in YYYY-MM-DD format
-}
-
-import { Maintenance } from "@/type/calendar";
 
 
 export default function MaintenanceCalendar() {

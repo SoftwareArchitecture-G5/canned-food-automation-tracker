@@ -1,13 +1,12 @@
-import { auth } from '@clerk/nextjs/server'
-import {ArrowRight, BarChart2, Calendar, CircleGauge, Clock, Cog, FileText, Github, Layout} from "lucide-react";
+import {BarChart2, Calendar, CircleGauge, Clock, Cog, FileText, Github, Layout} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 
 
 export default async function Home() {
-    const {getToken} = await auth();
-    const token = await getToken()
+    // import { auth } from '@clerk/nextjs/server'
+    // const {getToken} = await auth();
+    // const token = await getToken()
   return (
       <main className="flex-1">
           <section className="w-full py-12 md:py-24 lg:py-32">

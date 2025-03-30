@@ -5,10 +5,6 @@ import {ThemeProvider} from "@/components/theme-provider";
 import {Navbar} from "@/components/header-footer/Navbar";
 import {
     ClerkProvider,
-    SignInButton,
-    SignedIn,
-    SignedOut,
-    UserButton, SignUpButton
 } from '@clerk/nextjs'
 import Footer from "@/components/header-footer/Footer";
 
