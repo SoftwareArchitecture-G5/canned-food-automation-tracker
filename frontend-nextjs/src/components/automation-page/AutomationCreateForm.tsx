@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import {Automation} from "@/type/automation";
+import { createAutomation } from "@/app/automations/action";
+
 
 const formSchema = z.object({
     name: z
@@ -44,30 +46,21 @@ export function CreateAutomationForm({ onAutomationCreated }: { onAutomationCrea
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
-
+    
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(values),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to create automation");
+            const newAutomation = await createAutomation(values);
+    
+            if (!newAutomation) {
+                throw new Error("Automation creation returned null");
             }
-
-            const newAutomation = await response.json();
-
+    
             onAutomationCreated(newAutomation);
-
+    
             toast({
                 title: "Automation created",
                 description: `${values.name} has been successfully created.`,
             });
-
+    
             form.reset();
         } catch (error) {
             console.error("Error creating automation:", error);
