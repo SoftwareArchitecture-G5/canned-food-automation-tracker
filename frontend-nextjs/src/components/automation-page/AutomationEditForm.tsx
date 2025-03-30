@@ -26,7 +26,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 
-import {Automation, AutomationStatus} from "@/type/automation";
+import { Automation, AutomationStatus } from "@/type/automation";
+import { updateAutomation } from "@/app/automations/action";
 
 const formSchema = z.object({
   name: z
@@ -81,23 +82,14 @@ export function EditAutomationForm({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations/${automation.automation_id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(values),
-        }
+      const updatedAutomation = await updateAutomation(
+        automation.automation_id,
+        values
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to update automation");
+      if (!updatedAutomation) {
+        throw new Error("Automation update failed");
       }
-
-      const updatedAutomation = await response.json();
 
       onAutomationUpdated(updatedAutomation);
 
@@ -176,10 +168,7 @@ export function EditAutomationForm({
                 <FormItem>
                   <FormLabel>Status</FormLabel>
                   <FormControl>
-                    <Select
-                      onValueChange={field.onChange} 
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a status" />
                       </SelectTrigger>
