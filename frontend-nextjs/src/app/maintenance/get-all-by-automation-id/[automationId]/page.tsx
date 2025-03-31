@@ -31,6 +31,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
                     });
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     const data: Maintenance[] = await response.json();
+                    data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Sort by date (oldest first)
                     setMaintenanceData(data);
                 } catch (error) {
                     console.error("Fetch error:", error);
@@ -39,7 +40,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
         };
 
         fetchData();
-    }, [automationId]); // Re-fetch when automationId changes
+    }, [automationId, maintenanceData]); // Re-fetch when automationId and maintenanceData changes
 
     useEffect(() => {
         const getAutomationId = async () => {

@@ -54,7 +54,6 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
             <DialogTitle>Edit Maintenance</DialogTitle>
             <form onSubmit={handleUpdate}>
                 {/* Issue Report */}
-                <div>
                 <Label htmlFor="issue_report">Issue Report</Label>
                 <Input
                     id="issue_report"
@@ -63,9 +62,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
                     required
                     defaultValue={maintenanceData?.issue_report || ""}
                 />
-                </div>
                 {/* Date */}
-                <div>
                 <Label htmlFor="date">Date</Label>
                 <Input
                     id="date"
@@ -74,9 +71,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
                     required
                     defaultValue={maintenanceData?.date || ""}
                 />
-                </div>
                 {/* Status */}
-                <div>
                 <Label htmlFor="status">Status</Label>
                 <Select name="status" defaultValue={maintenanceData?.status || "pending"} required
                     onValueChange={(status) => setStatus(status as MaintenanceStatus)}>
@@ -91,7 +86,6 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
                         ))}
                     </SelectContent>
                 </Select>
-                </div>
                 <DialogFooter className="mt-4">
                     <Button type="submit">Update Maintenance</Button>
                 </DialogFooter>
