@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import {
     Dialog,
@@ -26,6 +28,14 @@ export const SaveBlueprintDialog = ({
                                         onBlueprintNameChange,
                                         onSave,
                                     }: SaveBlueprintDialogProps) => {
+    const handleSave = () => {
+        if (!blueprintName.trim()) {
+            alert("Please enter a blueprint name");
+            return;
+        }
+        onSave();
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -39,13 +49,14 @@ export const SaveBlueprintDialog = ({
                         value={blueprintName}
                         onChange={(e) => onBlueprintNameChange(e.target.value)}
                         placeholder="Enter blueprint name..."
+                        autoFocus
                     />
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                     </DialogClose>
-                    <Button onClick={onSave}>Save</Button>
+                    <Button onClick={handleSave}>Save</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -67,6 +78,14 @@ export const EditNodeDialog = ({
                                    onNodeLabelChange,
                                    onSave,
                                }: EditNodeDialogProps) => {
+    const handleSave = () => {
+        if (!nodeLabel.trim()) {
+            alert("Node label cannot be empty");
+            return;
+        }
+        onSave();
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -80,13 +99,14 @@ export const EditNodeDialog = ({
                         value={nodeLabel}
                         onChange={(e) => onNodeLabelChange(e.target.value)}
                         placeholder="Enter node label..."
+                        autoFocus
                     />
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                     </DialogClose>
-                    <Button onClick={onSave}>Save</Button>
+                    <Button onClick={handleSave}>Save</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
