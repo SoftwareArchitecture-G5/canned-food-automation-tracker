@@ -1,15 +1,4 @@
-.animated-edge {
-    stroke: #4285f4;
-    stroke-width: 2;
-    stroke-dasharray: 5;
-    animation: dashdraw 0.5s linear infinite;
-}
-
-@keyframes dashdraw {
-    from {
-        stroke-dashoffset: 10;
-    }
-    to {
-        stroke-dashoffset: 0;
-    }
+/* We can simplify this file since we're using SVG animations */
+.react-flow__edge-path {
+    transition: stroke 0.3s;
 }
