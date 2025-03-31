@@ -24,11 +24,18 @@ export default function BlueprintEditor({
                                             blueprints,
                                             onBlueprintSelect
                                         }: BlueprintEditorProps) {
+    // Transform initialEdges to have the animated type if provided
+    const animatedInitialEdges = initialEdges?.map(edge => ({
+        ...edge,
+        type: 'animated',
+        animated: true,
+    })) || [];
+
     return (
         <ReactFlowProvider>
             <FlowEditor
                 initialNodes={initialNodes}
-                initialEdges={initialEdges}
+                initialEdges={animatedInitialEdges}
                 onAutomationUsed={onAutomationUsed}
                 onAutomationRemoved={onAutomationRemoved}
                 blueprints={blueprints}

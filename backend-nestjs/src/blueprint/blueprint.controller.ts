@@ -18,18 +18,18 @@ export class BlueprintController {
     return this.blueprintService.findAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.blueprintService.findOne(+id);
-  // }
-  //
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateBlueprintDto: UpdateBlueprintDto) {
-  //   return this.blueprintService.update(+id, updateBlueprintDto);
-  // }
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.blueprintService.remove(+id);
-  // }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.blueprintService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateBlueprintDto: UpdateBlueprintDto) {
+    return this.blueprintService.update(id, updateBlueprintDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.blueprintService.remove(id);
+  }
 }
