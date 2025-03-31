@@ -13,10 +13,13 @@ import ReactFlow, {
     EdgeChange,
     NodeMouseHandler,
     Controls,
+    EdgeTypes,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import "./animatedEdge.css"; // Import the animation CSS
 import { Blueprint } from "@/type/blueprint";
 import ResizableNode from "./ResizableNode";
+import AnimatedSVGEdge from "./AnimatedSVGEdge"; // Import the new edge component
 import ContextMenu from "./ContextMenu";
 import BlueprintControls from "./BlueprintControls";
 import { SaveBlueprintDialog, EditNodeDialog } from "./BlueprintDialogs";
@@ -26,6 +29,11 @@ import LoadingSpinner from "./LoadingSpinner";
 // Define the node types
 const nodeTypes = {
     resizable: ResizableNode,
+};
+
+// Define the edge types
+const edgeTypes: EdgeTypes = {
+    animated: AnimatedSVGEdge,
 };
 
 interface FlowEditorProps {
@@ -52,7 +60,13 @@ const FlowEditor = ({
             style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
         })) || []
     );
-    const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
+    const [edges, setEdges] = useState<Edge[]>(
+        initialEdges?.map(edge => ({
+            ...edge,
+            type: 'animated', // Apply the animated edge type to all edges
+            animated: true,
+        })) || []
+    );
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [blueprintName, setBlueprintName] = useState("");
     const [selectedBlueprintId, setSelectedBlueprintId] = useState("");
@@ -92,7 +106,15 @@ const FlowEditor = ({
     );
 
     const onConnect = useCallback(
-        (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
+        (connection: Connection) => {
+            // Add the animated type to new connections
+            const newEdge = {
+                ...connection,
+                type: 'animated',
+                animated: true,
+            };
+            setEdges((eds) => addEdge(newEdge, eds));
+        },
         []
     );
 
@@ -242,8 +264,15 @@ const FlowEditor = ({
                 style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
             }));
 
+            // Apply animated edge type to all loaded edges
+            const animatedEdges = selectedBlueprint.edges.map(edge => ({
+                ...edge,
+                type: 'animated',
+                animated: true,
+            }));
+
             setNodes(resizableNodes);
-            setEdges(selectedBlueprint.edges);
+            setEdges(animatedEdges);
             setSelectedBlueprintId(blueprintId);
             onBlueprintSelect(blueprintId);
         }
@@ -399,6 +428,7 @@ const FlowEditor = ({
                     onConnect={onConnect}
                     onNodesDelete={onNodesDelete}
                     nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
                     onNodeContextMenu={onNodeContextMenu}
                     onPaneContextMenu={onPaneContextMenu}
                     onPaneClick={onPaneClick}
