@@ -17,7 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash } from "lucide-react";
+import { MoreHorizontal, Edit, Trash, Proportions } from "lucide-react";
 import { Automation } from "@/type/automation";
 import {
   Dialog,
@@ -76,7 +76,9 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
           {automations.map((automation) => (
             <TableRow key={automation.automation_id}>
               <TableCell className="font-medium">
-                <Link href={`/maintenance/get-all-by-automation-id/${automation.automation_id}`}>
+                <Link
+                  href={`/maintenance/get-all-by-automation-id/${automation.automation_id}`}
+                >
                   {automation.automation_id}
                 </Link>
               </TableCell>
@@ -114,6 +116,11 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
                       onClick={() => handleDelete(automation.automation_id)}
                     >
                       <Trash className="mr-2 h-4 w-4 text-red-500" /> Delete
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/report/${automation.automation_id}`}>
+                        <Proportions className="mr-2 h-4 w-4" /> View Report
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
