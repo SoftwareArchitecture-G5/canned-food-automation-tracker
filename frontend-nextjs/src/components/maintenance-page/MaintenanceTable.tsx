@@ -45,7 +45,7 @@ export default function MaintenanceTable({ data }: { data: Maintenance[] }) {
                         <TableCell>{item.date}</TableCell>
                         <TableCell>{item.status}</TableCell>
                         <TableCell>{item.automation.name}</TableCell>
-                        <TableCell>
+                        <TableCell style={{ display: "flex", alignItems: "center" }}>
                             <MaintenanceEditDialog maintenanceData={item} />
                             <Button onClick={() => handleDelete(item.maintenance_id)} variant="destructive">Delete</Button>
                         </TableCell>

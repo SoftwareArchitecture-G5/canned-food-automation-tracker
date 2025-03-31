@@ -31,9 +31,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
                 credentials: "include",
                 body: JSON.stringify(updatedMaintenance),
             });
-
             console.log(JSON.stringify(updatedMaintenance))
-            console.log(MaintenanceStatus.COMPLETED)
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             setIsOpen(false); // Close the dialog
         } catch (error) {
@@ -94,7 +92,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
                     </SelectContent>
                 </Select>
                 </div>
-                <DialogFooter>
+                <DialogFooter className="mt-4">
                     <Button type="submit">Update Maintenance</Button>
                 </DialogFooter>
             </form>

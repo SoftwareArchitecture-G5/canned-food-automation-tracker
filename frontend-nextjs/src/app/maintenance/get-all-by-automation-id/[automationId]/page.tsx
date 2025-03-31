@@ -53,12 +53,12 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     return (
         <div>
             <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
-                <Input
-                    placeholder="Search by issue or automation..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full max-w-md mb-5"
-                />
+            <Input
+                placeholder="Search by issue or automation..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full max-w-md mb-5"
+            />
             <MaintenanceCreateDialog automationId={ automationId }/>
             <MaintenanceTable data={ filteredData }/>
         </div>
