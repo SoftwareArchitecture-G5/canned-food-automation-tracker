@@ -53,17 +53,21 @@ export class MaintenanceService {
         return this.maintenanceRepository.remove(maintenance)
     }
 
-    async findAllByAutomationId(automation_id: string): Promise<Maintenance[]> {
+    async findAllByAutomationId(automation_id: string, page: number, limit: number): Promise<Maintenance[]> {
         const automation = await this.automationService.findOne(automation_id)
         const maintenance = await this.maintenanceRepository.find({
             where: {
                 automation: {automation_id: automation.automation_id}
             },
-            relations: ["automation"]
+            relations: ["automation"],
+            take: limit,  // Limit the number of records (page size)
+            skip: (page - 1) * limit,  // Skip the records based on the page
         })
+
         if (!maintenance) {
             throw new NotFoundException(`Could not find maintenance with automation id ${automation_id}`)
         }
-        return maintenance;
+
+        return maintenance
     }
 }

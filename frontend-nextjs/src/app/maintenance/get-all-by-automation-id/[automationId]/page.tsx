@@ -4,12 +4,17 @@ import { useEffect, useState } from "react";
 import { Maintenance } from "@/type/maintenance";
 import MaintenanceTable from "@/components/maintenance-page/MaintenanceTable";
 import MaintenanceCreateDialog from "@/components/maintenance-page/MaintenanceCreateDialog";
+import { PaginationLink } from "@/components/ui/pagination";
+import { useSearchParams } from 'next/navigation';
 
 
 export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
     const [search, setSearch] = useState("");
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const [automationId, setAutomationId] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+    const page = searchParams.get('page');
+    const limit = searchParams.get('limit');
 
     // Filtered data based on search input
     const filteredData = maintenanceData.filter(
@@ -22,7 +27,11 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     useEffect(() => {
         const fetchData = async () => {
             if (automationId) {
-                const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}`;
+                const params = new URLSearchParams(); // For easy URL building
+                if (page) params.append('page', page);
+                if (limit) params.append('limit', limit);
+
+                const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}?${params.toString()}`;
                 try {
                     const response = await fetch(url, {
                         headers: { "Content-Type": "application/json" },
@@ -62,6 +71,12 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
             />
             <MaintenanceCreateDialog automationId={ automationId }/>
             <MaintenanceTable data={ filteredData }/>
+
+            <PaginationLink
+            // page={1}
+            // pageSize={20}
+            // totalCount={500}
+            />
         </div>
     );
 }

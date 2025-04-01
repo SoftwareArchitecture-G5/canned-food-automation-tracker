@@ -46,7 +46,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
             className="mr-2"
             onClick={() => setIsOpen(true)}
         >
-            Edit Maintenance
+            Edit
         </Button>
     
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

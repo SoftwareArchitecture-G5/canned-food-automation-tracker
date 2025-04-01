@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import { Maintenance } from "./entities/maintenance.entity";
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-
+import { Request } from '@nestjs/common';
 
 @ApiTags('Maintenances')
 @Controller('maintenances')
@@ -37,9 +37,16 @@ export class MaintenanceController {
   @Get('get-all-by-automation-id/:automationId')
   @ApiOperation({ summary: 'Get all maintenance entries by automation ID' })
   @ApiParam({ name: 'automationId', type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of maintenance entries by automation ID', type: [Maintenance] })
-  async findOneByAutomationId(@Param('automationId') automationId: string): Promise<Maintenance[]> {
-    return this.maintenanceService.findAllByAutomationId(automationId);
+  async findOneByAutomationId(
+    @Param('automationId') automationId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<Maintenance[]> {
+    console.log('Received parameters:', { automationId, page, limit });
+    return this.maintenanceService.findAllByAutomationId(automationId, page, limit);
   }
 
   @Patch(':id')
