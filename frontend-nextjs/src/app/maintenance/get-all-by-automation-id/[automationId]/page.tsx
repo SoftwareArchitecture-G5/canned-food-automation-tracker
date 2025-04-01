@@ -4,8 +4,16 @@ import { useEffect, useState } from "react";
 import { Maintenance } from "@/type/maintenance";
 import MaintenanceTable from "@/components/maintenance-page/MaintenanceTable";
 import MaintenanceCreateDialog from "@/components/maintenance-page/MaintenanceCreateDialog";
-import { PaginationLink } from "@/components/ui/pagination";
 import { useSearchParams } from 'next/navigation';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+  } from "@/components/ui/pagination";
+import { useRouter } from "next/navigation";
 
 
 export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
@@ -13,8 +21,9 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const [automationId, setAutomationId] = useState<string | null>(null);
     const searchParams = useSearchParams();
-    const page = searchParams.get('page');
-    const limit = searchParams.get('limit');
+    const page = Number(searchParams.get('page')) || 1;
+    const limit = Number(searchParams.get('limit')) || 10;
+    const router = useRouter(); // #TODO use hooks instead of router
 
     // Filtered data based on search input
     const filteredData = maintenanceData.filter(
@@ -23,31 +32,44 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
             item.automation.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const prevPage = () => {
+        if (page > 1) {
+            router.push(`?page=${page - 1}&limit=${limit}`);
+        }
+    };
+
+    const nextPage = () => {
+        router.push(`?page=${page + 1}&limit=${limit}`);
+    };
+
+    const fetchData = async () => {
+        if (automationId) {
+            const params = new URLSearchParams(); // For easy URL building
+            if (page) params.append('page', String(page));
+            if (limit) params.append('limit', String(limit));
+
+            const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}?${params.toString()}`;
+            try {
+                const response = await fetch(url, {
+                    headers: { "Content-Type": "application/json" },
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data: Maintenance[] = await response.json();
+                setMaintenanceData(data);
+            } catch (error) {
+                console.error("Fetch error:", error);
+            }
+        }
+    };
+
+    // const hasNextPage = () => {
+    //     fetchData(page)
+    // }
+
     // Fetch maintenance data once automationId is available
     useEffect(() => {
-        const fetchData = async () => {
-            if (automationId) {
-                const params = new URLSearchParams(); // For easy URL building
-                if (page) params.append('page', page);
-                if (limit) params.append('limit', limit);
-
-                const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}?${params.toString()}`;
-                try {
-                    const response = await fetch(url, {
-                        headers: { "Content-Type": "application/json" },
-                        method: "GET",
-                        credentials: "include",
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    const data: Maintenance[] = await response.json();
-                    data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Sort by date (oldest first)
-                    setMaintenanceData(data);
-                } catch (error) {
-                    console.error("Fetch error:", error);
-                }
-            }
-        };
-
         fetchData();
     }, [automationId, maintenanceData]); // Re-fetch when automationId and maintenanceData changes
 
@@ -72,11 +94,43 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
             <MaintenanceCreateDialog automationId={ automationId }/>
             <MaintenanceTable data={ filteredData }/>
 
-            <PaginationLink
-            // page={1}
-            // pageSize={20}
-            // totalCount={500}
-            />
+            <Pagination className="mt-3">
+            <PaginationContent>
+                {/* Prev Button */}
+                { page > 1 && (
+                <PaginationPrevious onClick={prevPage} />
+                )}
+
+                {/* Prev Ellipsis */}
+                {page > 2 && (
+                    <PaginationEllipsis />
+                )}
+
+                {/* Prev Page */}
+                { page > 1 && (
+                    <PaginationLink onClick={prevPage}>{page - 1}</PaginationLink>
+                )}
+
+                {/* Current Page */}
+                <PaginationLink isActive>{page}</PaginationLink>
+
+                {/* Next Page */}
+                { maintenanceData.length == limit && (
+                <PaginationLink onClick={nextPage}>{page + 1}</PaginationLink>
+                )}
+
+                {/* Next Ellipsis */}
+                { maintenanceData.length == limit && (
+                <PaginationEllipsis />
+                )}
+
+                {/* Next Button */} 
+                {/* todo fetch the next 1 row, if have include else don't */}
+                { maintenanceData.length == limit && (
+                <PaginationNext onClick={nextPage} />
+                )}
+            </PaginationContent>
+            </Pagination>
         </div>
     );
 }
