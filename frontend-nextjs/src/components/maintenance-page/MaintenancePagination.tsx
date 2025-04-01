@@ -1,6 +1,5 @@
 import {
     Pagination,
-    PaginationEllipsis,
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
@@ -13,7 +12,7 @@ interface PaginationProps {
 }
 
 export default function MaintenancePagination({ paginationMetaData }: PaginationProps) {
-    const { page, limit, nextPageExists, nextNextPageExists } = paginationMetaData;
+    const { page, limit, nextPageExists } = paginationMetaData;
     const router = useRouter();
 
     const prevPage = () => {
@@ -29,9 +28,6 @@ export default function MaintenancePagination({ paginationMetaData }: Pagination
             {/* Prev Button */}
             {page > 1 && <PaginationPrevious onClick={prevPage} />}
 
-            {/* Prev Ellipsis */}
-            {page > 2 && <PaginationEllipsis />}
-
             {/* Prev Page */}
             {page > 1 && <PaginationLink onClick={prevPage}>{page - 1}</PaginationLink>}
 
@@ -40,9 +36,6 @@ export default function MaintenancePagination({ paginationMetaData }: Pagination
 
             {/* Next Page */}
             {nextPageExists && <PaginationLink onClick={nextPage}>{page + 1}</PaginationLink>}
-
-            {/* Next Ellipsis */}
-            {nextNextPageExists && <PaginationEllipsis />}
 
             {/* Next Button */}
             {nextPageExists && <PaginationNext onClick={nextPage} />}

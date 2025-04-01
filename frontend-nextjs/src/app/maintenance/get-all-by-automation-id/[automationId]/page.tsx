@@ -13,7 +13,6 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const [automationId, setAutomationId] = useState<string | null>(null);
     const [nextPageExists, setNextPageExists] = useState(false);
-    const [nextNextPageExists, setNextNextPageExists] = useState(false);
     const searchParams = useSearchParams();
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 10;
@@ -32,7 +31,6 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
         const fetchPageMetaData = async () => {
             const checkPage = await fetchPaginationMetaData(automationId, page, limit);
             setNextPageExists(checkPage.hasNextPage);
-            setNextNextPageExists(checkPage.hasNextNextPage);
         };
 
         fetchData();
@@ -46,13 +44,12 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
         };
 
         getAutomationId();
-    }, [params]);
+    });
 
     const paginationMetaData = {
         page,
         limit,
         nextPageExists,
-        nextNextPageExists,
     };
 
     return (

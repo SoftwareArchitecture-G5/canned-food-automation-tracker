@@ -17,5 +17,4 @@ export interface MaintenancePaginationMetaData {
     page: number;
     limit: number;
     nextPageExists: boolean;
-    nextNextPageExists: boolean;
 };

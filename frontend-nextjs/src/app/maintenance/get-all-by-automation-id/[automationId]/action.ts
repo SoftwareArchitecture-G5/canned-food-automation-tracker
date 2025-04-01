@@ -21,10 +21,8 @@ export const fetchMaintenanceData = async (automationId: string | null, page: nu
 };
 
 export const fetchPaginationMetaData = async (automationId: string | null, page: number, limit: number) => {
-    // page + 1 for checking next page, limit + 1 for checking next next page
-    const data = await fetchMaintenanceData(automationId, page + 1, limit + 1);
+    const data = await fetchMaintenanceData(automationId, page + 1, limit);
     return {
         hasNextPage: data.length > 0,
-        hasNextNextPage: data.length > limit
     };
 };
