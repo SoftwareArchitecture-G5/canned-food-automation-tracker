@@ -354,6 +354,16 @@ const FlowEditor = ({
         }
     };
 
+    // NEW: Handler for the maintenance option
+    const handleMaintenanceView = () => {
+        if (contextMenu) {
+            const nodeId = contextMenu.nodeId;
+            const maintenanceUrl = `/maintenance/get-all-by-automation-id/${nodeId}`;
+            router.push(maintenanceUrl);
+            closeContextMenu();
+        }
+    };
+
     const handleSaveNodeEdit = () => {
         if (editNodeId) {
             setNodes((nds) =>
@@ -445,6 +455,7 @@ const FlowEditor = ({
                         top={contextMenu.top}
                         left={contextMenu.left}
                         onClose={closeContextMenu}
+                        onMaintenance={handleMaintenanceView}
                         onEdit={handleEditNode}
                         onDelete={handleDeleteNode}
                         onDuplicate={handleDuplicateNode}
