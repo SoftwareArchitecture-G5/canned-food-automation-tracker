@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import { Maintenance } from "./entities/maintenance.entity";
-import { Request } from '@nestjs/common';
+
 
 @ApiTags('Maintenances')
 @Controller('maintenances')
@@ -45,7 +45,6 @@ export class MaintenanceController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ): Promise<Maintenance[]> {
-    console.log('Received parameters:', { automationId, page, limit });
     return this.maintenanceService.findAllByAutomationId(automationId, page, limit);
   }
 

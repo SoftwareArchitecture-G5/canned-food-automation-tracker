@@ -5,7 +5,6 @@ import {Maintenance} from "./entities/maintenance.entity";
 import {Repository} from "typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
 import {AutomationService} from "../automation/automation.service";
-import {raw} from "express";
 
 @Injectable()
 export class MaintenanceService {
@@ -60,6 +59,7 @@ export class MaintenanceService {
                 automation: {automation_id: automation.automation_id}
             },
             relations: ["automation"],
+            order: { date: 'ASC' },
             take: limit,  // Limit the number of records (page size)
             skip: (page - 1) * limit,  // Skip the records based on the page
         })
