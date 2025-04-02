@@ -33,7 +33,7 @@ export default function BlueprintPage() {
                 setCurrentBlueprint(latestBlueprint);
 
                 // Fetch automation list
-                const automationResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`);
+                const automationResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations/all`);
                 const automationData = await automationResponse.json();
                 setAutomations(automationData);
 
