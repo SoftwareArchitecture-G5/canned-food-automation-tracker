@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { EditAutomationForm } from "./AutomationEditForm";
 import Link from "next/link";
+import { deleteAutomation } from "@/app/automations/action";
 
 interface AutomationTableProps {
   automationsData: Automation[];
@@ -39,25 +40,11 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
   );
 
   const handleDelete = async (id: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations/${id}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete automation");
-      }
-
+    const success = await deleteAutomation(id);
+    if (success) {
       setAutomations((prev) =>
         prev.filter((automation) => automation.automation_id !== id)
       );
-    } catch (error) {
-      console.error("Error deleting automation:", error);
     }
   };
 
