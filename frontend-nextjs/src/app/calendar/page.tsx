@@ -3,34 +3,33 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import {Maintenance} from "@/type/maintenance";
-
+import { Maintenance } from "@/type/maintenance";
+import {fetchMaintenances} from "@/app/calendar/action";
 
 
 export default function MaintenanceCalendar() {
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
     const calendarRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            console.log("Fetching from:", process.env.NEXT_PUBLIC_BACKEND_DOMAIN);
+        const loadData = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances`, {
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET",
-                    credentials: "include",
-                });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const data: Maintenance[] = await response.json();
+                setIsLoading(true);
+                const data = await fetchMaintenances();
                 setMaintenanceData(data);
+                setError(null);
             } catch (error) {
-                console.error("Fetch error:", error);
+                console.error("Failed to fetch maintenance data:", error);
+                setError("Failed to load maintenance data. Please try again later.");
+            } finally {
+                setIsLoading(false);
             }
         };
-    
-        fetchData();
+
+        loadData();
     }, []);
-    
 
     useEffect(() => {
         if (calendarRef.current && maintenanceData.length > 0) {
@@ -39,7 +38,7 @@ export default function MaintenanceCalendar() {
                 start: maintenance.date,
                 id: maintenance.maintenance_id,
             }));
-    
+
             const calendar = new Calendar(calendarRef.current, {
                 plugins: [dayGridPlugin],
                 initialView: "dayGridMonth",
@@ -50,5 +49,13 @@ export default function MaintenanceCalendar() {
         }
     }, [maintenanceData]);
 
-    return <div ref={calendarRef} />;
+    if (isLoading) {
+        return <div className="flex justify-center p-8">Loading maintenance calendar...</div>;
+    }
+
+    if (error) {
+        return <div className="text-red-500 p-4">{error}</div>;
+    }
+
+    return <div ref={calendarRef} className="min-h-[500px]" />;
 }

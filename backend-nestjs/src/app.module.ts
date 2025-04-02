@@ -10,6 +10,7 @@ import { CalendarService } from './calendar/calendar.service';
 import { CalendarModule } from './calendar/calendar.module';
 import { BlueprintModule } from './blueprint/blueprint.module';
 import * as process from "node:process";
+import {AuthModule} from "./auth/auth.module";
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import * as process from "node:process";
         MaintenanceModule,
         CalendarModule,
         BlueprintModule,
+        AuthModule,
 
     ],
     controllers: [AppController, CalendarController],
