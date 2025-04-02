@@ -1,3 +1,5 @@
+import {Automation} from "@/type/automation";
+
 export async function fetchBlueprintData() {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint`, {
         method: 'GET',
@@ -7,7 +9,7 @@ export async function fetchBlueprintData() {
     return data;
 }
 
-export const saveBlueprint = async (blueprintName: string, nodes: any[], edges: any[]) => {
+export const saveBlueprint = async (blueprintName: string, nodes: any[], edges: any[]):Promise<string> => {
     if (!blueprintName) {
         throw new Error("Please enter a blueprint name!");
     }
@@ -31,7 +33,7 @@ export const saveBlueprint = async (blueprintName: string, nodes: any[], edges: 
     }
 };
 
-export const saveExistingBlueprint = async (selectedBlueprintId: string, nodes: any[], edges: any[]) => {
+export const saveExistingBlueprint = async (selectedBlueprintId: string, nodes: any[], edges: any[]): Promise<string> => {
     if (!selectedBlueprintId) {
         throw new Error("No blueprint selected!");
     }
@@ -55,7 +57,7 @@ export const saveExistingBlueprint = async (selectedBlueprintId: string, nodes: 
     }
 };
 
-export const deleteBlueprint = async (selectedBlueprintId: string) => {
+export const deleteBlueprint = async (selectedBlueprintId: string): Promise<string> => {
     if (!selectedBlueprintId) {
         throw new Error("No blueprint selected to delete!");
     }
@@ -75,3 +77,13 @@ export const deleteBlueprint = async (selectedBlueprintId: string) => {
         throw new Error(`Failed to delete blueprint: ${error}`);
     }
 };
+
+export async function fetchAutomations():Promise<Automation[]> {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations/all`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching automation data:", error);
+        return [];
+    }
+}

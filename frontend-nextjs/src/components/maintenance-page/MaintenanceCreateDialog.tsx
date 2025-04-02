@@ -3,10 +3,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import {useUser} from "@clerk/nextjs";
+import {RoleType} from "@/type/role";
 
 export default function MaintenanceCreateDialog({ automationId } : { automationId: string | null }) {
     const [isOpen, setIsOpen] = useState(false); // Dialog visibility
-
+    const { user } = useUser()
+    const role = user?.organizationMemberships[0].role
+    const isAuthorized = role === RoleType.ENGINEER;
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
@@ -41,7 +45,7 @@ export default function MaintenanceCreateDialog({ automationId } : { automationI
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button>Create Maintenance</Button>
+                <Button disabled={!isAuthorized}>Create Maintenance</Button>
             </DialogTrigger>
 
             <DialogContent>

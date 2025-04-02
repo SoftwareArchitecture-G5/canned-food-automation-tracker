@@ -15,6 +15,8 @@ import { CirclePlus } from "lucide-react";
 import { Automation } from "@/type/automation";
 import { useState, useEffect } from "react";
 import { getAutomations } from "./action";
+import {useUser} from "@clerk/nextjs";
+import {RoleType} from "@/type/role";
 
 export default function AutomationPage() {
     const [automations, setAutomations] = useState<Automation[]>([]);
@@ -22,6 +24,9 @@ export default function AutomationPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const limit = 10;
+    const { user } = useUser()
+    const role = user?.organizationMemberships[0].role
+    const isAuthorized = role === RoleType.PLANNER || role === RoleType.ADMIN;
 
     useEffect(() => {
         async function fetchData() {
@@ -57,7 +62,7 @@ export default function AutomationPage() {
 
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button variant={"default"}>
+                    <Button variant={"default"} disabled={!isAuthorized}>
                         Adding Automation
                         <CirclePlus />
                     </Button>
