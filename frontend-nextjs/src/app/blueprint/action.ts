@@ -1,9 +1,16 @@
+"use server"
 import {Automation} from "@/type/automation";
+import { auth } from '@clerk/nextjs/server'
 
 export async function fetchBlueprintData() {
+    const {getToken } = await auth();
+    const token = await getToken({template: "automation-tracker"})
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint`, {
         method: 'GET',
-        headers: {"Content-Type": "application/json"},
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
     });
     const data = await response.json();
     return data;
