@@ -21,16 +21,19 @@ export class BlueprintController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.blueprintService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateBlueprintDto: UpdateBlueprintDto) {
     return this.blueprintService.update(id, updateBlueprintDto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.blueprintService.remove(id);
   }
