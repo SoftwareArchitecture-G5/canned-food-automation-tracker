@@ -6,6 +6,7 @@ import MaintenanceTable from "@/components/maintenance-page/MaintenanceTable";
 import MaintenanceCreateDialog from "@/components/maintenance-page/MaintenanceCreateDialog";
 
 
+
 export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
     const [search, setSearch] = useState("");
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
@@ -49,6 +50,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
 
         getAutomationId();
     }, [params]);
+
 
     return (
         <div>

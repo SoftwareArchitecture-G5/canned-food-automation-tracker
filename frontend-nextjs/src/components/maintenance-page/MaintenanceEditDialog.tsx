@@ -5,12 +5,17 @@ import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/u
 import { Dialog, DialogContent, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Maintenance, MaintenanceStatus } from "@/type/maintenance";
 import { useState } from "react";
+import {useUser} from "@clerk/nextjs";
+import {RoleType} from "@/type/role";
 
 
 export default function MaintenanceEditDialog({ maintenanceData } : { maintenanceData: Maintenance }) {
     const statusOptions = Object.values(MaintenanceStatus);
     const [isOpen, setIsOpen] = useState(false);
     const [status, setStatus] = useState(maintenanceData?.status);
+    const { user } = useUser()
+    const role = user?.organizationMemberships[0].role
+    const isAuthorized = role === RoleType.ENGINEER;
 
     const handleUpdate = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -47,6 +52,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
             variant="outline"
             className="mr-2"
             onClick={() => setIsOpen(true)}
+            disabled={!isAuthorized}
         >
             Edit Maintenance
         </Button>

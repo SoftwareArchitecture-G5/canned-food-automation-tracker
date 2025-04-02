@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, ChevronsUpDown, Check } from "lucide-react";
@@ -23,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Blueprint } from "@/type/blueprint";
 import { Node } from "reactflow";
+import { useUser } from '@clerk/nextjs'
 
 interface BlueprintControlsProps {
     blueprints: Blueprint[];
@@ -30,6 +33,7 @@ interface BlueprintControlsProps {
     selectedBlueprintId: string;
     onSave: () => void;
     onCreateNew: () => void;
+    onDelete: () => void;
     onRemoveNode: (nodeId: string) => void;
     onBlueprintSelect: (blueprintId: string) => void;
 }
@@ -40,10 +44,18 @@ const BlueprintControls = ({
                                selectedBlueprintId,
                                onSave,
                                onCreateNew,
+                               onDelete,
                                onRemoveNode,
                                onBlueprintSelect,
                            }: BlueprintControlsProps) => {
     const [open, setOpen] = React.useState(false);
+    const { user } = useUser()
+    const role = user?.organizationMemberships[0].role
+    const isAuthorized = role === "org:planner" || role === "org:admin";
+
+    const selectedBlueprintName = selectedBlueprintId
+        ? blueprints.find((blueprint) => blueprint.blueprint_id === selectedBlueprintId)?.name || "Select a blueprint..."
+        : "Select a blueprint...";
 
     return (
         <div className="flex gap-4 mb-8 justify-between items-center">
@@ -57,9 +69,7 @@ const BlueprintControls = ({
                             aria-expanded={open}
                             className="w-[200px] justify-between"
                         >
-                            {selectedBlueprintId
-                                ? blueprints.find((blueprint) => blueprint.blueprint_id === selectedBlueprintId)?.name || "Select a blueprint..."
-                                : "Select a blueprint..."}
+                            {selectedBlueprintName}
                             <ChevronsUpDown className="opacity-50" />
                         </Button>
                     </PopoverTrigger>
@@ -94,24 +104,60 @@ const BlueprintControls = ({
                 </Popover>
 
                 {/* Save and Create New buttons */}
-                <Button onClick={onSave}>Save</Button>
-                <Button onClick={onCreateNew}>Create New</Button>
+                <Button
+                    onClick={onSave}
+                    disabled={!selectedBlueprintId || !isAuthorized}
+                    title={
+                        !selectedBlueprintId
+                            ? "Select a blueprint first"
+                            : !isAuthorized
+                                ? "You need planner or admin permissions"
+                                : "Save blueprint"
+                    }
+                >
+                    Save
+                </Button>
+                <Button
+                    onClick={onCreateNew}
+                    disabled={!isAuthorized}
+                    title={!isAuthorized ? "You need planner or admin permissions" : "Create new blueprint"}
+                >
+                    Create New
+                </Button>
+                <Button
+                    onClick={onDelete}
+                    variant={"destructive"}
+                    disabled={!selectedBlueprintId || !isAuthorized}
+                    title={
+                        !selectedBlueprintId
+                            ? "Select a blueprint first"
+                            : !isAuthorized
+                                ? "You need planner or admin permissions"
+                                : "Delete blueprint"
+                    }
+                >
+                    Delete
+                </Button>
             </div>
 
             {/* Dropdown to remove nodes */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant={"outline"}>
+                    <Button variant={"outline"} disabled={nodes.length === 0}>
                         Remove Automation In Flow
-                        <Trash2 />
+                        <Trash2 className="ml-2" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    {nodes.map((node) => (
-                        <DropdownMenuItem key={node.id} onClick={() => onRemoveNode(node.id)}>
-                            Remove {node.data.label}
-                        </DropdownMenuItem>
-                    ))}
+                    {nodes.length === 0 ? (
+                        <DropdownMenuItem disabled>No nodes to remove</DropdownMenuItem>
+                    ) : (
+                        nodes.map((node) => (
+                            <DropdownMenuItem key={node.id} onClick={() => onRemoveNode(node.id)}>
+                                Remove {node.data.label}
+                            </DropdownMenuItem>
+                        ))
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

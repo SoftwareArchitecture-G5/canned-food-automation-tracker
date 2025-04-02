@@ -1,0 +1,4 @@
+/* We can simplify this file since we're using SVG animations */
+.react-flow__edge-path {
+    transition: stroke 0.3s;
+}
