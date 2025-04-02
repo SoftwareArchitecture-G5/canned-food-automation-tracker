@@ -25,6 +25,7 @@ import BlueprintControls from "./BlueprintControls";
 import { SaveBlueprintDialog, EditNodeDialog } from "./BlueprintDialogs";
 import { useRouter } from 'next/navigation'
 import LoadingSpinner from "./LoadingSpinner";
+import {deleteBlueprint, saveBlueprint, saveExistingBlueprint} from "@/app/blueprint/action";
 
 // Define the node types
 const nodeTypes = {
@@ -159,101 +160,50 @@ const FlowEditor = ({
     );
 
     const handleSave = async () => {
-        if (!blueprintName) {
-            alert("Please enter a blueprint name!");
-            return;
-        }
-
-        const blueprintData = { name: blueprintName, nodes, edges };
-        console.log(blueprintData);
-
         try {
             setIsLoading(true);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint/save`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(blueprintData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            alert("Blueprint saved!");
+            const message = await saveBlueprint(blueprintName, nodes, edges);
+            alert(message);
             setIsDialogOpen(false);
             setNeedsRefresh(true);
         } catch (error) {
-            console.error("Error saving blueprint:", error);
-            alert(`Failed to save blueprint: ${error}`);
+            alert((error as Error).message);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleSaveExisting = async () => {
-        if (!selectedBlueprintId) {
-            alert("No blueprint selected!");
-            return;
-        }
-
-        console.log(selectedBlueprintId);
-        const blueprintData = { nodes, edges };
         try {
             setIsLoading(true);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint/${selectedBlueprintId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(blueprintData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            alert("Existing blueprint saved!");
+            const message = await saveExistingBlueprint(selectedBlueprintId, nodes, edges);
+            alert(message);
             setNeedsRefresh(true);
         } catch (error) {
-            console.error("Error saving blueprint:", (error as Error).message);
-            alert(`Failed to save blueprint: ${error}`);
+            alert((error as Error).message);
         } finally {
             setIsLoading(false);
         }
     };
 
+
     const handleDelete = async () => {
-        if (!selectedBlueprintId) {
-            alert("No blueprint selected to delete!");
-            return;
-        }
+        if (!confirm("Are you sure you want to delete this blueprint?")) return;
 
-        if (!confirm("Are you sure you want to delete this blueprint?")) {
-            return;
-        }
-
-        console.log("Deleting blueprint:", selectedBlueprintId);
         try {
             setIsLoading(true);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint/${selectedBlueprintId}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            alert("Blueprint deleted successfully!");
+            const message = await deleteBlueprint(selectedBlueprintId);
+            alert(message);
             setSelectedBlueprintId("");
             setNodes([]);
             setEdges([]);
             setNeedsRefresh(true);
         } catch (error) {
-            console.error("Error deleting blueprint:", error);
-            alert(`Failed to delete blueprint: ${error}`);
+            alert((error as Error).message);
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     const handleLoadBlueprint = (blueprintId: string) => {
         const selectedBlueprint = blueprints.find(bp => bp.blueprint_id === blueprintId);
