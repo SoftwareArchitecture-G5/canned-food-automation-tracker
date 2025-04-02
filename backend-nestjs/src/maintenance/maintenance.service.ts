@@ -6,6 +6,7 @@ import {Repository} from "typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
 import {AutomationService} from "../automation/automation.service";
 import {raw} from "express";
+import { Between } from 'typeorm';
 
 @Injectable()
 export class MaintenanceService {
@@ -66,4 +67,26 @@ export class MaintenanceService {
         }
         return maintenance;
     }
+
+    async findByDateRange(startDate: string, endDate: string): Promise<Maintenance[]> {
+        try {
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          // Set end date to end of day to include the entire end date
+          end.setHours(23, 59, 59, 999);
+      
+          const maintenance = await this.maintenanceRepository.find({
+            where: {
+              date: Between(start, end)
+            },
+            relations: ['automation'],
+          });
+          
+          // Return empty array instead of throwing error if no records found
+          return maintenance || [];
+        } catch (error) {
+          console.error('Error in findByDateRange:', error);
+          throw new Error(`Failed to find maintenance between ${startDate} and ${endDate}: ${error.message}`);
+        }
+      }
 }
