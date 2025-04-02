@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import { Maintenance } from "@/type/maintenance";
 import MaintenanceTable from "@/components/maintenance-page/MaintenanceTable";
 import MaintenanceCreateDialog from "@/components/maintenance-page/MaintenanceCreateDialog";
+import {useUser} from "@clerk/nextjs"
+import {RoleType} from "@/type/role";
 
 export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
     const [search, setSearch] = useState("");
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const [automationId, setAutomationId] = useState<string | null>(null);
-
+    const { user } = useUser()
+    const role = user?.organizationMemberships[0].role
+    const isAuthorized = role === RoleType.ENGINEER;
     // Filtered data based on search input
     const filteredData = maintenanceData.filter(
         (item) =>
@@ -48,6 +52,10 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
 
         getAutomationId();
     }, [params]);
+
+    if (!isAuthorized) {
+        return <div>Your role does not allow access to this page</div>
+    };
 
     return (
         <div>

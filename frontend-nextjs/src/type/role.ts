@@ -3,4 +3,5 @@ export enum RoleType {
     MEMBER = 'org:member',
     ENGINEER = 'org:engineer',
     PLANNER = 'org:planner',
+    MANAGER = 'org:manager',
 }

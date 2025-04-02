@@ -32,11 +32,16 @@ export class AutomationController {
       }
     }
   })
-  async findAll(
+  async findAllPagination(
     @Query('page') page = '1',
     @Query('limit') limit = '10',
   ): Promise<{ data: Automation[]; total: number }> {
     return this.automationService.findAllPaginated(Number(page), Number(limit));
+  }
+
+  @Get("all")
+  async findAll(): Promise<Automation[]> {
+    return this.automationService.findAll();
   }
 
   @Get(':id')
