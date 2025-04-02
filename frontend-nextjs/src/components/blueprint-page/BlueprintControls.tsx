@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Blueprint } from "@/type/blueprint";
 import { Node } from "reactflow";
+import { useUser } from '@clerk/nextjs'
 
 interface BlueprintControlsProps {
     blueprints: Blueprint[];
@@ -48,6 +49,9 @@ const BlueprintControls = ({
                                onBlueprintSelect,
                            }: BlueprintControlsProps) => {
     const [open, setOpen] = React.useState(false);
+    const { user } = useUser()
+    const role = user?.organizationMemberships[0].role
+    const isAuthorized = role === "org:planner" || role === "org:admin";
 
     const selectedBlueprintName = selectedBlueprintId
         ? blueprints.find((blueprint) => blueprint.blueprint_id === selectedBlueprintId)?.name || "Select a blueprint..."
@@ -102,17 +106,35 @@ const BlueprintControls = ({
                 {/* Save and Create New buttons */}
                 <Button
                     onClick={onSave}
-                    disabled={!selectedBlueprintId}
-                    title={!selectedBlueprintId ? "Select a blueprint first" : "Save blueprint"}
+                    disabled={!selectedBlueprintId || !isAuthorized}
+                    title={
+                        !selectedBlueprintId
+                            ? "Select a blueprint first"
+                            : !isAuthorized
+                                ? "You need planner or admin permissions"
+                                : "Save blueprint"
+                    }
                 >
                     Save
                 </Button>
-                <Button onClick={onCreateNew}>Create New</Button>
+                <Button
+                    onClick={onCreateNew}
+                    disabled={!isAuthorized}
+                    title={!isAuthorized ? "You need planner or admin permissions" : "Create new blueprint"}
+                >
+                    Create New
+                </Button>
                 <Button
                     onClick={onDelete}
                     variant={"destructive"}
-                    disabled={!selectedBlueprintId}
-                    title={!selectedBlueprintId ? "Select a blueprint first" : "Delete blueprint"}
+                    disabled={!selectedBlueprintId || !isAuthorized}
+                    title={
+                        !selectedBlueprintId
+                            ? "Select a blueprint first"
+                            : !isAuthorized
+                                ? "You need planner or admin permissions"
+                                : "Delete blueprint"
+                    }
                 >
                     Delete
                 </Button>

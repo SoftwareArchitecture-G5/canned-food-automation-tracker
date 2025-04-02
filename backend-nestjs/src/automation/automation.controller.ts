@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Query, Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AutomationService } from './automation.service';
 import { CreateAutomationDto } from './dto/create-automation.dto';
 import { UpdateAutomationDto } from './dto/update-automation.dto';
 import { Automation } from "./entities/automation.entity";
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 
 @ApiTags('Automations')
@@ -19,8 +19,27 @@ export class AutomationController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all automations' })
-  @ApiResponse({ status: 200, description: 'List of automations', type: [Automation] })
+  @ApiOperation({ summary: 'Get all automations with pagination' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({
+    status: 200,
+    description: 'List of automations with pagination',
+    schema: {
+      example: {
+        data: [ /* automation objects */ ],
+        total: 35
+      }
+    }
+  })
+  async findAllPagination(
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ): Promise<{ data: Automation[]; total: number }> {
+    return this.automationService.findAllPaginated(Number(page), Number(limit));
+  }
+
+  @Get("all")
   async findAll(): Promise<Automation[]> {
     return this.automationService.findAll();
   }

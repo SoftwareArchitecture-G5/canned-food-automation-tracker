@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useRef, useEffect } from "react";
-import { Edit, Copy, Trash, ArrowUpDown } from "lucide-react";
+import React, {useRef, useEffect} from "react";
+import {Edit, Copy, Trash, ArrowUpDown, Construction} from "lucide-react";
 
 interface ContextMenuProps {
     nodeId: string;
@@ -9,6 +9,7 @@ interface ContextMenuProps {
     left: number;
     onClose: () => void;
     onEdit: () => void;
+    onMaintenance: () => void;
     onDelete: () => void;
     onDuplicate: () => void;
     onBringToFront: () => void;
@@ -19,6 +20,7 @@ const ContextMenu = ({
                          left,
                          onClose,
                          onEdit,
+                         onMaintenance,
                          onDelete,
                          onDuplicate,
                          onBringToFront,
@@ -74,29 +76,35 @@ const ContextMenu = ({
             </div>
             <div className="py-1">
                 <button
+                    className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                    onClick={onMaintenance}
+                >
+                    <Construction className="w-4 h-4 mr-2"/> Maintenances
+                </button>
+                <button
                     onClick={onEdit}
                     className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
                 >
-                    <Edit className="w-4 h-4 mr-2" /> Edit Node
+                    <Edit className="w-4 h-4 mr-2"/> Edit Node
                 </button>
                 <button
                     onClick={onDuplicate}
                     className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
                 >
-                    <Copy className="w-4 h-4 mr-2" /> Duplicate
+                    <Copy className="w-4 h-4 mr-2"/> Duplicate
                 </button>
                 <button
                     onClick={onBringToFront}
                     className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
                 >
-                    <ArrowUpDown className="w-4 h-4 mr-2" /> Bring to Front
+                    <ArrowUpDown className="w-4 h-4 mr-2"/> Bring to Front
                 </button>
                 <div className="border-t border-gray-100 my-1"></div>
                 <button
                     onClick={onDelete}
                     className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                 >
-                    <Trash className="w-4 h-4 mr-2" /> Delete
+                    <Trash className="w-4 h-4 mr-2"/> Delete
                 </button>
             </div>
         </div>

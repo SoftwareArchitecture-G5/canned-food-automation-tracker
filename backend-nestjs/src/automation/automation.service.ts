@@ -39,4 +39,17 @@ export class AutomationService {
     return this.automationRepository.remove(automation)
 
   }
+
+  async findAllPaginated(page: number, limit: number): Promise<{ data: Automation[]; total: number }> {
+    const skip = (page - 1) * limit;
+  
+    const [data, total] = await this.automationRepository.findAndCount({
+      skip,
+      take: limit,
+      order: { created_at: 'DESC' },
+    });
+  
+    return { data, total };
+  }
+  
 }
