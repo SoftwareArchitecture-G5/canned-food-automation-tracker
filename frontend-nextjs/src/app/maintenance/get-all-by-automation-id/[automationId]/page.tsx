@@ -6,6 +6,7 @@ import MaintenanceTable from "@/components/maintenance-page/MaintenanceTable";
 import MaintenanceCreateDialog from "@/components/maintenance-page/MaintenanceCreateDialog";
 import {useUser} from "@clerk/nextjs"
 import {RoleType} from "@/type/role";
+import NotAllowToPage from "@/components/security-component/NotAllowToPage";
 
 export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
     const [search, setSearch] = useState("");
@@ -54,7 +55,7 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     }, [params]);
 
     if (!isAuthorized) {
-        return <div>Your role does not allow access to this page</div>
+        return <NotAllowToPage/>;
     };
 
     return (
