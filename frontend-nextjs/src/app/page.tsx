@@ -21,7 +21,9 @@ export default async function Home() {
                           </p>
                       </div>
                       <div className="space-x-4">
+                        <a href="/dashboard" className="no-underline">
                           <Button><CircleGauge />Access Dashboard</Button>
+                        </a>
                           <Button variant="outline"><Github />View Github</Button>
                       </div>
                   </div>
