@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
 import { BlueprintService } from './blueprint.service';
 import { CreateBlueprintDto } from './dto/create-blueprint.dto';
 import { UpdateBlueprintDto } from './dto/update-blueprint.dto';
 import {Blueprint} from "./entities/blueprint.entity";
+import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 
 @Controller('blueprint')
 export class BlueprintController {
@@ -14,21 +15,25 @@ export class BlueprintController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.blueprintService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.blueprintService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateBlueprintDto: UpdateBlueprintDto) {
     return this.blueprintService.update(id, updateBlueprintDto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.blueprintService.remove(id);
   }

@@ -17,7 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash } from "lucide-react";
+import { MoreHorizontal, Edit, Trash, Proportions, Info } from "lucide-react";
 import { Automation } from "@/type/automation";
 import {
   Dialog,
@@ -28,8 +28,9 @@ import {
 import { EditAutomationForm } from "./AutomationEditForm";
 import Link from "next/link";
 import { deleteAutomation } from "@/app/automations/action";
-import {useUser} from "@clerk/nextjs";
-import {RoleType} from "@/type/role";
+import { useUser } from "@clerk/nextjs";
+import { RoleType } from "@/type/role";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AutomationTableProps {
   automationsData: Automation[];
@@ -45,7 +46,10 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
   const isAuthorized = role === RoleType.PLANNER || role === RoleType.ADMIN;
 
   const handleDelete = async (id: string) => {
-    if (!isAuthorized) return;
+    if (!isAuthorized) {
+      alert("You don't have permission to delete automations");
+      return;
+    }
     const success = await deleteAutomation(id);
     if (success) {
       setAutomations((prev) =>
@@ -62,6 +66,14 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
                 : automation
         )
     );
+  };
+
+  const handleEditClick = (automation: Automation) => {
+    if (!isAuthorized) {
+      alert("You don't have permission to edit automations");
+      return;
+    }
+    setEditingAutomation(automation);
   };
 
   return (
@@ -82,7 +94,9 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
             {automations.map((automation) => (
                 <TableRow key={automation.automation_id}>
                   <TableCell className="font-medium">
-                    <Link href={`/maintenance/get-all-by-automation-id/${automation.automation_id}`}>
+                    <Link
+                        href={`/maintenance/get-all-by-automation-id/${automation.automation_id}`}
+                    >
                       {automation.automation_id}
                     </Link>
                   </TableCell>
@@ -104,27 +118,54 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
                     {new Date(automation.updated_at).toLocaleString()}
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" disabled={!isAuthorized}>
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                            onClick={() => isAuthorized && setEditingAutomation(automation)}
-                            disabled={!isAuthorized}
-                        >
-                          <Edit className="mr-2 h-4 w-4" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => isAuthorized && handleDelete(automation.automation_id)}
-                            disabled={!isAuthorized}
-                        >
-                          <Trash className="mr-2 h-4 w-4 text-red-500" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <TooltipProvider>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuItem
+                                  onClick={() => handleEditClick(automation)}
+                                  className={!isAuthorized ? "cursor-not-allowed opacity-50" : ""}
+                              >
+                                <Edit className="mr-2 h-4 w-4" /> Edit
+                              </DropdownMenuItem>
+                            </TooltipTrigger>
+                            {!isAuthorized && (
+                                <TooltipContent>
+                                  <p>You need PLANNER or ADMIN permissions</p>
+                                </TooltipContent>
+                            )}
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuItem
+                                  onClick={() => handleDelete(automation.automation_id)}
+                                  className={!isAuthorized ? "cursor-not-allowed opacity-50" : ""}
+                              >
+                                <Trash className="mr-2 h-4 w-4 text-red-500" /> Delete
+                              </DropdownMenuItem>
+                            </TooltipTrigger>
+                            {!isAuthorized && (
+                                <TooltipContent>
+                                  <p>You need PLANNER or ADMIN permissions</p>
+                                </TooltipContent>
+                            )}
+                          </Tooltip>
+
+                          <DropdownMenuItem asChild>
+                            <Link href={`/report/${automation.automation_id}`}>
+                              <Proportions className="mr-2 h-4 w-4" /> View Report
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
             ))}

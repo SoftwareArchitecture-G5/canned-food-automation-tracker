@@ -8,6 +8,7 @@ import { Blueprint } from "@/type/blueprint";
 import {Node, Edge} from "reactflow";
 import {Automation} from "@/type/automation";
 
+
 const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/BlueprintEditor"), {
     ssr: false,
 });
@@ -18,7 +19,6 @@ export default function BlueprintPage() {
     const [automations, setAutomations] = useState<{ automation_id: string; name: string }[]>([]);
     const [usedAutomations, setUsedAutomations] = useState<string[]>([]); // State for used automations
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const loadBlueprint = async () => {
