@@ -34,6 +34,7 @@ export class MaintenanceController {
   @ApiQuery({ name: 'endDate', required: true, type: String, description: 'End date in ISO format (YYYY-MM-DD)' })
   @ApiResponse({ status: 200, description: 'Maintenance records found', type: [Maintenance] })
   @ApiResponse({ status: 404, description: 'No maintenance records found in the specified date range' })
+  @UseGuards(JwtAuthGuard)
   async findByDateRange(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
