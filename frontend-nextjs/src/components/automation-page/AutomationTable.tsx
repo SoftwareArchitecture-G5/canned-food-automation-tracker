@@ -28,6 +28,8 @@ import {
 import { EditAutomationForm } from "./AutomationEditForm";
 import Link from "next/link";
 import { deleteAutomation } from "@/app/automations/action";
+import {useUser} from "@clerk/nextjs";
+import {RoleType} from "@/type/role";
 
 interface AutomationTableProps {
   automationsData: Automation[];
@@ -36,25 +38,29 @@ interface AutomationTableProps {
 export function AutomationTable({ automationsData }: AutomationTableProps) {
   const [automations, setAutomations] = useState(automationsData);
   const [editingAutomation, setEditingAutomation] = useState<Automation | null>(
-    null
+      null
   );
+  const { user } = useUser();
+  const role = user?.organizationMemberships[0]?.role;
+  const isAuthorized = role === RoleType.PLANNER || role === RoleType.ADMIN;
 
   const handleDelete = async (id: string) => {
+    if (!isAuthorized) return;
     const success = await deleteAutomation(id);
     if (success) {
       setAutomations((prev) =>
-        prev.filter((automation) => automation.automation_id !== id)
+          prev.filter((automation) => automation.automation_id !== id)
       );
     }
   };
 
   const handleAutomationUpdated = (updatedAutomation: Automation) => {
     setAutomations((prev) =>
-      prev.map((automation) =>
-        automation.automation_id === updatedAutomation.automation_id
-          ? updatedAutomation
-          : automation
-      )
+        prev.map((automation) =>
+            automation.automation_id === updatedAutomation.automation_id
+                ? updatedAutomation
+                : automation
+        )
     );
   };
 
@@ -130,24 +136,24 @@ export function AutomationTable({ automationsData }: AutomationTableProps) {
         </TableBody>
       </Table>
 
-      {/* Edit Dialog */}
-      {editingAutomation && (
-        <Dialog
-          open={!!editingAutomation}
-          onOpenChange={() => setEditingAutomation(null)}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Automation</DialogTitle>
-            </DialogHeader>
-            <EditAutomationForm
-              automation={editingAutomation}
-              onAutomationUpdated={handleAutomationUpdated}
-              onClose={() => setEditingAutomation(null)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
+        {/* Edit Dialog */}
+        {editingAutomation && (
+            <Dialog
+                open={!!editingAutomation}
+                onOpenChange={() => setEditingAutomation(null)}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Automation</DialogTitle>
+                </DialogHeader>
+                <EditAutomationForm
+                    automation={editingAutomation}
+                    onAutomationUpdated={handleAutomationUpdated}
+                    onClose={() => setEditingAutomation(null)}
+                />
+              </DialogContent>
+            </Dialog>
+        )}
+      </div>
   );
 }
