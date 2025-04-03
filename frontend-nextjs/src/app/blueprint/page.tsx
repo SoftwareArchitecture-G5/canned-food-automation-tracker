@@ -2,10 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { fetchBlueprintData } from "@/app/blueprint/action";
+import {fetchAutomations, fetchBlueprintData} from "@/app/blueprint/action";
 import AutomationPanel from "@/components/blueprint-page/AutomationPanel";
 import { Blueprint } from "@/type/blueprint";
 import {Node, Edge} from "reactflow";
+import {Automation} from "@/type/automation";
+
 
 const BlueprintEditor = dynamic(() => import("@/components/blueprint-page/BlueprintEditor"), {
     ssr: false,
@@ -17,7 +19,6 @@ export default function BlueprintPage() {
     const [automations, setAutomations] = useState<{ automation_id: string; name: string }[]>([]);
     const [usedAutomations, setUsedAutomations] = useState<string[]>([]); // State for used automations
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const loadBlueprint = async () => {
@@ -33,8 +34,8 @@ export default function BlueprintPage() {
                 setCurrentBlueprint(latestBlueprint);
 
                 // Fetch automation list
-                const automationResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/automations`);
-                const automationData = await automationResponse.json();
+                const automationData: Automation[] = await fetchAutomations();
+                setAutomations(automationData);
                 setAutomations(automationData);
 
                 // Check if any automations are already used in the blueprint

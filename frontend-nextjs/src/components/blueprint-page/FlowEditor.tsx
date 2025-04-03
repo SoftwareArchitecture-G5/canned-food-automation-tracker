@@ -1,4 +1,6 @@
-import React, { useCallback, useState } from "react";
+"use client"
+
+import React, { useCallback, useState, useEffect } from "react";
 import ReactFlow, {
     addEdge,
     applyEdgeChanges,
@@ -11,18 +13,28 @@ import ReactFlow, {
     EdgeChange,
     NodeMouseHandler,
     Controls,
-    useReactFlow,
+    EdgeTypes,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import "./animatedEdge.css"; // Import the animation CSS
 import { Blueprint } from "@/type/blueprint";
 import ResizableNode from "./ResizableNode";
+import AnimatedSVGEdge from "./AnimatedSVGEdge"; // Import the new edge component
 import ContextMenu from "./ContextMenu";
 import BlueprintControls from "./BlueprintControls";
 import { SaveBlueprintDialog, EditNodeDialog } from "./BlueprintDialogs";
+import { useRouter } from 'next/navigation'
+import LoadingSpinner from "./LoadingSpinner";
+import {deleteBlueprint, saveBlueprint, saveExistingBlueprint} from "@/app/blueprint/action";
 
 // Define the node types
 const nodeTypes = {
     resizable: ResizableNode,
+};
+
+// Define the edge types
+const edgeTypes: EdgeTypes = {
+    animated: AnimatedSVGEdge,
 };
 
 interface FlowEditorProps {
@@ -49,10 +61,19 @@ const FlowEditor = ({
             style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
         })) || []
     );
-    const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
+    const [edges, setEdges] = useState<Edge[]>(
+        initialEdges?.map(edge => ({
+            ...edge,
+            type: 'animated', // Apply the animated edge type to all edges
+            animated: true,
+        })) || []
+    );
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [blueprintName, setBlueprintName] = useState("");
     const [selectedBlueprintId, setSelectedBlueprintId] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [needsRefresh, setNeedsRefresh] = useState(false);
+    const router = useRouter()
 
     // Context menu state
     const [contextMenu, setContextMenu] = useState<{
@@ -67,6 +88,14 @@ const FlowEditor = ({
     const [editNodeId, setEditNodeId] = useState<string | null>(null);
     const [editNodeLabel, setEditNodeLabel] = useState("");
 
+    // Effect to handle refreshing after operations complete
+    useEffect(() => {
+        if (needsRefresh && !isLoading) {
+            // Force a hard refresh of the page
+            window.location.reload();
+        }
+    }, [needsRefresh, isLoading]);
+
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
         []
@@ -78,7 +107,15 @@ const FlowEditor = ({
     );
 
     const onConnect = useCallback(
-        (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
+        (connection: Connection) => {
+            // Add the animated type to new connections
+            const newEdge = {
+                ...connection,
+                type: 'animated',
+                animated: true,
+            };
+            setEdges((eds) => addEdge(newEdge, eds));
+        },
         []
     );
 
@@ -123,31 +160,49 @@ const FlowEditor = ({
     );
 
     const handleSave = async () => {
-        if (!blueprintName) {
-            alert("Please enter a blueprint name!");
-            return;
-        }
-
-        const blueprintData = { name: blueprintName, nodes, edges };
-        console.log(blueprintData);
-
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/blueprint/save`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(blueprintData),
-            });
-
-            alert("Blueprint saved!");
+            setIsLoading(true);
+            const message = await saveBlueprint(blueprintName, nodes, edges);
+            alert(message);
             setIsDialogOpen(false);
+            setNeedsRefresh(true);
         } catch (error) {
-            console.error("Error saving blueprint:", error);
+            alert((error as Error).message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleSaveExisting = async () => {
-        console.log(selectedBlueprintId);
-        // Implement save existing blueprint logic
+        try {
+            setIsLoading(true);
+            const message = await saveExistingBlueprint(selectedBlueprintId, nodes, edges);
+            alert(message);
+            setNeedsRefresh(true);
+        } catch (error) {
+            alert((error as Error).message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this blueprint?")) return;
+
+        try {
+            setIsLoading(true);
+            const message = await deleteBlueprint(selectedBlueprintId);
+            alert(message);
+            setSelectedBlueprintId("");
+            setNodes([]);
+            setEdges([]);
+            setNeedsRefresh(true);
+        } catch (error) {
+            alert((error as Error).message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleLoadBlueprint = (blueprintId: string) => {
@@ -159,8 +214,15 @@ const FlowEditor = ({
                 style: { ...node.style, width: node.style?.width || 180, height: node.style?.height || 80 }
             }));
 
+            // Apply animated edge type to all loaded edges
+            const animatedEdges = selectedBlueprint.edges.map(edge => ({
+                ...edge,
+                type: 'animated',
+                animated: true,
+            }));
+
             setNodes(resizableNodes);
-            setEdges(selectedBlueprint.edges);
+            setEdges(animatedEdges);
             setSelectedBlueprintId(blueprintId);
             onBlueprintSelect(blueprintId);
         }
@@ -242,6 +304,16 @@ const FlowEditor = ({
         }
     };
 
+    // NEW: Handler for the maintenance option
+    const handleMaintenanceView = () => {
+        if (contextMenu) {
+            const nodeId = contextMenu.nodeId;
+            const maintenanceUrl = `/maintenance/get-all-by-automation-id/${nodeId}`;
+            router.push(maintenanceUrl);
+            closeContextMenu();
+        }
+    };
+
     const handleSaveNodeEdit = () => {
         if (editNodeId) {
             setNodes((nds) =>
@@ -275,12 +347,15 @@ const FlowEditor = ({
             onDragOver={(e) => e.preventDefault()}
             className="w-full h-4/5 mx-6 relative"
         >
+            {isLoading && <LoadingSpinner />}
+
             <BlueprintControls
                 blueprints={blueprints}
                 nodes={nodes}
                 selectedBlueprintId={selectedBlueprintId}
                 onSave={handleSaveExisting}
                 onCreateNew={() => setIsDialogOpen(true)}
+                onDelete={handleDelete}
                 onRemoveNode={removeNode}
                 onBlueprintSelect={handleLoadBlueprint}
             />
@@ -313,6 +388,7 @@ const FlowEditor = ({
                     onConnect={onConnect}
                     onNodesDelete={onNodesDelete}
                     nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
                     onNodeContextMenu={onNodeContextMenu}
                     onPaneContextMenu={onPaneContextMenu}
                     onPaneClick={onPaneClick}
@@ -329,6 +405,7 @@ const FlowEditor = ({
                         top={contextMenu.top}
                         left={contextMenu.left}
                         onClose={closeContextMenu}
+                        onMaintenance={handleMaintenanceView}
                         onEdit={handleEditNode}
                         onDelete={handleDeleteNode}
                         onDuplicate={handleDuplicateNode}
