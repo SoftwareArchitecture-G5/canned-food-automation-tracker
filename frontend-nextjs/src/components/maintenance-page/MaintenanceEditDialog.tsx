@@ -16,7 +16,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
     const [status, setStatus] = useState(maintenanceData?.status);
     const { user } = useUser()
     const role = user?.organizationMemberships[0].role
-    const isAuthorized = role === RoleType.ENGINEER || RoleType.ADMIN;
+    const isAuthorized = role === RoleType.ENGINEER || role === RoleType.ADMIN;
 
     const handleUpdate = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -28,7 +28,6 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
             date: formData.get("date"),
             status,
         };
-
         try {
             await updateMaintenance(maintenanceData.maintenance_id, updatedMaintenance);
             setIsOpen(false); // Close the dialog
@@ -39,6 +38,49 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
 
     return (
         <div>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent>
+            <DialogTitle>Edit Maintenance</DialogTitle>
+            <form onSubmit={handleUpdate}>
+                {/* Issue Report */}
+                <Label htmlFor="issue_report">Issue Report</Label>
+                <Input
+                    id="issue_report"
+                    name="issue_report"
+                    type="text"
+                    required
+                    defaultValue={maintenanceData?.issue_report || ""}
+                />
+                {/* Date */}
+                <Label htmlFor="date">Date</Label>
+                <Input
+                    id="date"
+                    name="date"
+                    type="date"
+                    required
+                    defaultValue={maintenanceData?.date || ""}
+                />
+                {/* Status */}
+                <Label htmlFor="status">Status</Label>
+                <Select name="status" defaultValue={maintenanceData?.status || "pending"} required
+                    onValueChange={(status) => setStatus(status as MaintenanceStatus)}>
+                    <SelectTrigger>
+                        {status}
+                    </SelectTrigger>
+                    <SelectContent>
+                        {statusOptions.map((status) => (
+                        <SelectItem key={status} value={status}>
+                            {status}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <DialogFooter className="mt-4">
+                    <Button type="submit">Update Maintenance</Button>
+                </DialogFooter>
+            </form>
+            </DialogContent>
+        </Dialog>
             <Button
                 variant="outline"
                 className="mr-2"

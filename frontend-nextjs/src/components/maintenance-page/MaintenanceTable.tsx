@@ -11,7 +11,7 @@ export default function MaintenanceTable({ data }: { data: Maintenance[] }) {
     const [maintenanceData, setMaintenanceData] = useState<Maintenance[]>([]);
     const { user } = useUser()
     const role = user?.organizationMemberships[0].role
-    const isAuthorized = role === RoleType.ENGINEER || RoleType.ADMIN;
+    const isAuthorized = role === RoleType.ENGINEER || role === RoleType.ADMIN;
 
     const handleDelete = async (maintenanceId: string) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this maintenance?");
@@ -45,7 +45,7 @@ export default function MaintenanceTable({ data }: { data: Maintenance[] }) {
                         <TableCell>{item.date}</TableCell>
                         <TableCell>{item.status}</TableCell>
                         <TableCell>{item.automation.name}</TableCell>
-                        <TableCell>
+                        <TableCell style={{ display: "flex", alignItems: "center" }}>
                             <MaintenanceEditDialog maintenanceData={item}/>
                             <Button onClick={() => handleDelete(item.maintenance_id)} variant="destructive" disabled={!isAuthorized}>Delete</Button>
                         </TableCell>

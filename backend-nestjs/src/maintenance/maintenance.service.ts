@@ -5,7 +5,8 @@ import {Maintenance} from "./entities/maintenance.entity";
 import {Repository} from "typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
 import {AutomationService} from "../automation/automation.service";
-import {raw} from "express";
+import { Between } from 'typeorm';
+
 
 @Injectable()
 export class MaintenanceService {
@@ -53,17 +54,44 @@ export class MaintenanceService {
         return this.maintenanceRepository.remove(maintenance)
     }
 
-    async findAllByAutomationId(automation_id: string): Promise<Maintenance[]> {
+    async findAllByAutomationId(automation_id: string, page: number, limit: number): Promise<Maintenance[]> {
         const automation = await this.automationService.findOne(automation_id)
         const maintenance = await this.maintenanceRepository.find({
             where: {
                 automation: {automation_id: automation.automation_id}
             },
-            relations: ["automation"]
+            relations: ["automation"],
+            order: { date: 'ASC' },
+            take: limit,  // Limit the number of records (page size)
+            skip: (page - 1) * limit,  // Skip the records based on the page
         })
+
         if (!maintenance) {
             throw new NotFoundException(`Could not find maintenance with automation id ${automation_id}`)
         }
-        return maintenance;
+
+        return maintenance
     }
+
+    async findByDateRange(startDate: string, endDate: string): Promise<Maintenance[]> {
+        try {
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          // Set end date to end of day to include the entire end date
+          end.setHours(23, 59, 59, 999);
+      
+          const maintenance = await this.maintenanceRepository.find({
+            where: {
+              date: Between(start, end)
+            },
+            relations: ['automation'],
+          });
+          
+          // Return empty array instead of throwing error if no records found
+          return maintenance || [];
+        } catch (error) {
+          console.error('Error in findByDateRange:', error);
+          throw new Error(`Failed to find maintenance between ${startDate} and ${endDate}: ${error.message}`);
+        }
+      }
 }

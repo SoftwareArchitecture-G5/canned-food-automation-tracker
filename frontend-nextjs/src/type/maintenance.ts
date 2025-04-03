@@ -12,3 +12,9 @@ export interface Maintenance {
     status: MaintenanceStatus;
     automation: Automation;
 };
+
+export interface MaintenancePaginationMetaData {
+    page: number;
+    limit: number;
+    nextPageExists: boolean;
+};
