@@ -1,9 +1,9 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query} from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import { Maintenance } from "./entities/maintenance.entity";
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 
 
@@ -26,6 +26,20 @@ export class MaintenanceController {
   @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Maintenance[]> {
     return this.maintenanceService.findAll();
+  }
+  
+  @Get('date-range')
+  @ApiOperation({ summary: 'Find maintenance records by date range' })
+  @ApiQuery({ name: 'startDate', required: true, type: String, description: 'Start date in ISO format (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: true, type: String, description: 'End date in ISO format (YYYY-MM-DD)' })
+  @ApiResponse({ status: 200, description: 'Maintenance records found', type: [Maintenance] })
+  @ApiResponse({ status: 404, description: 'No maintenance records found in the specified date range' })
+  @UseGuards(JwtAuthGuard)
+  async findByDateRange(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<Maintenance[]> {
+    return this.maintenanceService.findByDateRange(startDate, endDate);
   }
 
   @Get(':id')
