@@ -26,6 +26,7 @@ import {
 import { Blueprint } from "@/type/blueprint";
 import { Node } from "reactflow";
 import { useUser } from '@clerk/nextjs'
+import {RoleType} from "@/type/role";
 
 interface BlueprintControlsProps {
     blueprints: Blueprint[];
@@ -51,7 +52,7 @@ const BlueprintControls = ({
     const [open, setOpen] = React.useState(false);
     const { user } = useUser()
     const role = user?.organizationMemberships[0].role
-    const isAuthorized = role === "org:planner" || role === "org:admin";
+    const isAuthorized = role === RoleType.PLANNER || role === RoleType.ADMIN;
 
     const selectedBlueprintName = selectedBlueprintId
         ? blueprints.find((blueprint) => blueprint.blueprint_id === selectedBlueprintId)?.name || "Select a blueprint..."

@@ -12,7 +12,7 @@ export default function MaintenanceCreateDialog({ automationId } : { automationI
     const [isOpen, setIsOpen] = useState(false); // Dialog visibility
     const { user } = useUser()
     const role = user?.organizationMemberships[0]?.role;
-    const isAuthorized = role === RoleType.ENGINEER || RoleType.ADMIN;
+    const isAuthorized = role === RoleType.ENGINEER || role === RoleType.ADMIN;
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();

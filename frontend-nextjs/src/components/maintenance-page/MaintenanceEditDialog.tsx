@@ -16,7 +16,7 @@ export default function MaintenanceEditDialog({ maintenanceData } : { maintenanc
     const [status, setStatus] = useState(maintenanceData?.status);
     const { user } = useUser()
     const role = user?.organizationMemberships[0].role
-    const isAuthorized = role === RoleType.ENGINEER || RoleType.ADMIN;
+    const isAuthorized = role === RoleType.ENGINEER || role === RoleType.ADMIN;
 
     const handleUpdate = async (event: React.FormEvent) => {
         event.preventDefault();
