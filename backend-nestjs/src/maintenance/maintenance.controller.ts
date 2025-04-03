@@ -55,10 +55,16 @@ export class MaintenanceController {
   @Get('get-all-by-automation-id/:automationId')
   @ApiOperation({ summary: 'Get all maintenance entries by automation ID' })
   @ApiParam({ name: 'automationId', type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of maintenance entries by automation ID', type: [Maintenance] })
   @UseGuards(JwtAuthGuard)
-  async findOneByAutomationId(@Param('automationId') automationId: string): Promise<Maintenance[]> {
-    return this.maintenanceService.findAllByAutomationId(automationId);
+  async findOneByAutomationId(
+    @Param('automationId') automationId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<Maintenance[]> {
+    return this.maintenanceService.findAllByAutomationId(automationId, page, limit);
   }
 
   @Patch(':id')

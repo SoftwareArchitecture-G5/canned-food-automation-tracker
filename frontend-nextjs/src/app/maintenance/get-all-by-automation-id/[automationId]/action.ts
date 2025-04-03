@@ -8,15 +8,21 @@ interface UpdateMaintenanceData {
     status: MaintenanceStatus;
 }
 
-export const fetchMaintenanceData = async (automationId: string) => {
+export const fetchMaintenanceData = async (automationId: string | null, page: number = 1, limit: number = 10) => {
+    if (!automationId) return [];
+
+    const params = new URLSearchParams();
+    params.append('page', String(page));
+    params.append('limit', String(limit));
     const {getToken} = await auth();
     const token = await getToken({template: "automation-tracker"})
-    const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}`;
+
+    const url = `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/maintenances/get-all-by-automation-id/${automationId}?${params.toString()}`;
     try {
         const response = await fetch(url, {
             headers: {
                 "Content-Type": "application/json",
-                authorization: `Bearer ${token}`
+                'Authorization': `Bearer ${token}`
             },
             method: "GET",
             credentials: "include",
@@ -27,6 +33,13 @@ export const fetchMaintenanceData = async (automationId: string) => {
         console.error("Fetch error:", error);
         return [];
     }
+};
+
+export const fetchPaginationMetaData = async (automationId: string | null, page: number, limit: number) => {
+    const data = await fetchMaintenanceData(automationId, page + 1, limit);
+    return {
+        hasNextPage: data.length > 0,
+    };
 };
 
 export const createMaintenance = async (newMaintenance: any) => {
