@@ -4,9 +4,6 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 
 
 export default async function Home() {
-    // import { auth } from '@clerk/nextjs/server'
-    // const {getToken} = await auth();
-    // const token = await getToken()
   return (
       <main className="flex-1">
           <section className="w-full py-12 md:py-24 lg:py-32">
@@ -21,7 +18,9 @@ export default async function Home() {
                           </p>
                       </div>
                       <div className="space-x-4">
+                        <a href="/dashboard" className="no-underline">
                           <Button><CircleGauge />Access Dashboard</Button>
+                        </a>
                           <Button variant="outline"><Github />View Github</Button>
                       </div>
                   </div>

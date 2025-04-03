@@ -22,6 +22,7 @@ export const Navbar = () => {
                 <Link href="/automations" className="">Automations</Link>
                 <Link href="/blueprint" className="">Blueprint</Link>
                 <Link href="/calendar" className="">Calendar</Link>
+                <Link href="/dashboard" className="">Dashboard</Link>
 
                 <SignedOut>
                     <Button asChild variant="outline">

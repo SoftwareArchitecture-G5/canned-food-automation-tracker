@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query} from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import { Maintenance } from "./entities/maintenance.entity";
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 
 
 @ApiTags('Maintenances')
@@ -14,6 +15,7 @@ export class MaintenanceController {
   @Post()
   @ApiOperation({ summary: 'Create a new maintenance entry' })
   @ApiResponse({ status: 201, description: 'Maintenance entry created successfully', type: Maintenance })
+  @UseGuards(JwtAuthGuard)
   async create(@Body() createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
     return this.maintenanceService.create(createMaintenanceDto);
   }
@@ -21,8 +23,23 @@ export class MaintenanceController {
   @Get()
   @ApiOperation({ summary: 'Get all maintenance entries' })
   @ApiResponse({ status: 200, description: 'List of all maintenance entries', type: [Maintenance] })
+  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Maintenance[]> {
     return this.maintenanceService.findAll();
+  }
+  
+  @Get('date-range')
+  @ApiOperation({ summary: 'Find maintenance records by date range' })
+  @ApiQuery({ name: 'startDate', required: true, type: String, description: 'Start date in ISO format (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: true, type: String, description: 'End date in ISO format (YYYY-MM-DD)' })
+  @ApiResponse({ status: 200, description: 'Maintenance records found', type: [Maintenance] })
+  @ApiResponse({ status: 404, description: 'No maintenance records found in the specified date range' })
+  @UseGuards(JwtAuthGuard)
+  async findByDateRange(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<Maintenance[]> {
+    return this.maintenanceService.findByDateRange(startDate, endDate);
   }
 
   @Get(':id')
@@ -30,6 +47,7 @@ export class MaintenanceController {
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Maintenance entry details', type: Maintenance })
   @ApiResponse({ status: 404, description: 'Maintenance entry not found' })
+  @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string): Promise<Maintenance> {
     return this.maintenanceService.findOne(id);
   }
@@ -40,6 +58,7 @@ export class MaintenanceController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of maintenance entries by automation ID', type: [Maintenance] })
+  @UseGuards(JwtAuthGuard)
   async findOneByAutomationId(
     @Param('automationId') automationId: string,
     @Query('page') page: number = 1,
@@ -52,6 +71,7 @@ export class MaintenanceController {
   @ApiOperation({ summary: 'Update a maintenance entry' })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Updated maintenance entry', type: Maintenance })
+  @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() updateMaintenanceDto: UpdateMaintenanceDto): Promise<Maintenance> {
     return this.maintenanceService.update(id, updateMaintenanceDto);
   }
@@ -60,6 +80,7 @@ export class MaintenanceController {
   @ApiOperation({ summary: 'Delete a maintenance entry' })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Maintenance entry deleted', type: Maintenance })
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string): Promise<Maintenance> {
     return this.maintenanceService.remove(id);
   }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import { CreateBlueprintDto } from './dto/create-blueprint.dto';
 import { UpdateBlueprintDto } from './dto/update-blueprint.dto';
 import {Blueprint} from "./entities/blueprint.entity";
@@ -17,19 +17,28 @@ export class BlueprintService {
     return await this.blueprintRepository.save(blueprint);
   }
 
-  findAll() {
+  async findAll(): Promise<Blueprint[]> {
     return this.blueprintRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} blueprint`;
+  async findOne(id: string): Promise<Blueprint> {
+    const blueprint: Blueprint|null = await this.blueprintRepository.findOne({
+      where: {blueprint_id: id}
+    })
+    if (!blueprint) {
+      throw new NotFoundException(`No such blueprint with id ${id}`);
+    }
+    return blueprint;
   }
 
-  update(id: number, updateBlueprintDto: UpdateBlueprintDto) {
-    return `This action updates a #${id} blueprint`;
+  async update(id: string, updateBlueprintDto: UpdateBlueprintDto) {
+    const blueprint = await this.findOne(id);
+    const updatedBlueprint = Object.assign(blueprint, updateBlueprintDto);
+    return await this.blueprintRepository.save(updatedBlueprint);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} blueprint`;
+  async remove(id: string) {
+    const blueprint = await this.findOne(id);
+    return await this.blueprintRepository.remove(blueprint);
   }
 }

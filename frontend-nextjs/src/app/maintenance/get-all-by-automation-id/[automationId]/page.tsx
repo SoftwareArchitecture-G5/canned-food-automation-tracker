@@ -6,7 +6,9 @@ import MaintenancePagination from "@/components/maintenance-page/MaintenancePagi
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Maintenance } from "@/type/maintenance";
-import { fetchMaintenanceData, fetchPaginationMetaData } from "./action";
+import {fetchPaginationMetaData } from "./action";
+import {fetchMaintenanceData} from "@/app/maintenance/get-all-by-automation-id/[automationId]/action";
+
 
 export default function MaintenancePage({ params }: { params: Promise<{ automationId: string }> }) {
     const [search, setSearch] = useState("");
@@ -53,15 +55,17 @@ export default function MaintenancePage({ params }: { params: Promise<{ automati
     };
 
     return (
-        <div>
+        <div className="h-screen">
             <div className="font-bold text-2xl mb-5">Maintenance Tracker</div>
-            <Input
-                placeholder="Search by issue or automation..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full max-w-md mb-5"
-            />
-            <MaintenanceCreateDialog automationId={automationId} />
+            <div className="flex flex-row gap-x-4 py-5">
+                <Input
+                    placeholder="Search by issue or automation..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full max-w-md mb-5"
+                />
+                <MaintenanceCreateDialog automationId={automationId} />
+            </div>
             <MaintenanceTable data={filteredData} />
             <MaintenancePagination paginationMetaData={paginationMetaData} />
         </div>
