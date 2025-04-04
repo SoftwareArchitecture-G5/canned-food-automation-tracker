@@ -31,6 +31,9 @@ DB_USERNAME='Your Database username'
 DB_PASS='Your Database password'
 DB_NAME='Your database name'
 DB_SSL='SSL option true or false'
+
+# Frontend Configuration variable
+FRONTEND_URL='http://localhost:3000'
 ```
 
 ### 4. Running server using NPM script
@@ -66,6 +69,10 @@ touch .env.local # MAC OS
 ```dotenv
 #Backend Domain
 NEXT_PUBLIC_BACKEND_DOMAIN="http://localhost:8000" # If you set nest.js server to port 8000
+
+# Clerk authentication privder config variables
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=YOUR_CLERK_KEY
+CLERK_SECRET_KEY="YOUR_SECRET_KEY"
 ```
 
 ### 4. Running frontend next.Js server by running this script
