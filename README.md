@@ -74,18 +74,14 @@ NEXT_PUBLIC_BACKEND_DOMAIN="http://localhost:8000" # If you set nest.js server t
 # this command run next with turboPack
 npm run dev
 ```
+## How to run test in NestJs Service
 
-## APIs Endpoint
-
-- ### Automation controller
-  - #### /automations (GET): Get all automations data
-  - #### /automations/:id (GET): Get automation data by specific id
-  - #### /automations (POST): Create automation data
-    ```json
-    {
-      "name": "automation name",
-      "description": "description"
-    }
-    ```
-  - #### /automations/:id (PATCH): Update automation by specific id
-  - #### /automations/:id (DELETE): Delete automation by specific id
+### 1. Reach the target service
+```bash
+cd ./backend-nestjs
+cd ./automation (example)
+```
+### 1. run the service.spec.ts test file
+```bash
+npm run test
+```

@@ -5,9 +5,6 @@ import {Module} from '@nestjs/common';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import { AutomationModule } from './automation/automation.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
-import { CalendarController } from './calendar/calendar.controller';
-import { CalendarService } from './calendar/calendar.service';
-import { CalendarModule } from './calendar/calendar.module';
 import { BlueprintModule } from './blueprint/blueprint.module';
 import * as process from "node:process";
 import {AuthModule} from "./auth/auth.module";
@@ -28,13 +25,12 @@ import {AuthModule} from "./auth/auth.module";
         }),
         AutomationModule,
         MaintenanceModule,
-        CalendarModule,
         BlueprintModule,
         AuthModule,
 
     ],
-    controllers: [AppController, CalendarController],
-    providers: [AppService, CalendarService],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {
 }
