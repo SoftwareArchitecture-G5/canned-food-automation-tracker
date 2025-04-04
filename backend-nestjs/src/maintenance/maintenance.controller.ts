@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Logger} from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
@@ -10,14 +10,26 @@ import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 @ApiTags('Maintenances')
 @Controller('maintenances')
 export class MaintenanceController {
-  constructor(private readonly maintenanceService: MaintenanceService) {}
+  private readonly logger = new Logger(MaintenanceController.name);
+
+  constructor(private readonly maintenanceService: MaintenanceService) {
+    this.logger.log('MaintenanceController initialized');
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new maintenance entry' })
   @ApiResponse({ status: 201, description: 'Maintenance entry created successfully', type: Maintenance })
   @UseGuards(JwtAuthGuard)
   async create(@Body() createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
-    return this.maintenanceService.create(createMaintenanceDto);
+    this.logger.log(`Creating maintenance entry for automation ID: ${createMaintenanceDto.automation_id}`);
+    try {
+      const result = await this.maintenanceService.create(createMaintenanceDto);
+      this.logger.log(`Maintenance entry created with ID: ${result.maintenance_id}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to create maintenance entry: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get()
@@ -25,7 +37,15 @@ export class MaintenanceController {
   @ApiResponse({ status: 200, description: 'List of all maintenance entries', type: [Maintenance] })
   @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Maintenance[]> {
-    return this.maintenanceService.findAll();
+    this.logger.log('Retrieving all maintenance entries');
+    try {
+      const results = await this.maintenanceService.findAll();
+      this.logger.log(`Retrieved ${results.length} maintenance entries`);
+      return results;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve maintenance entries: ${error.message}`, error.stack);
+      throw error;
+    }
   }
   
   @Get('date-range')
@@ -39,7 +59,15 @@ export class MaintenanceController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ): Promise<Maintenance[]> {
-    return this.maintenanceService.findByDateRange(startDate, endDate);
+    this.logger.log(`Retrieving maintenance entries between ${startDate} and ${endDate}`);
+    try {
+      const results = await this.maintenanceService.findByDateRange(startDate, endDate);
+      this.logger.log(`Retrieved ${results.length} maintenance entries in date range`);
+      return results;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve maintenance entries by date range: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get(':id')
@@ -49,7 +77,15 @@ export class MaintenanceController {
   @ApiResponse({ status: 404, description: 'Maintenance entry not found' })
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string): Promise<Maintenance> {
-    return this.maintenanceService.findOne(id);
+    this.logger.log(`Retrieving maintenance entry with ID: ${id}`);
+    try {
+      const result = await this.maintenanceService.findOne(id);
+      this.logger.log(`Retrieved maintenance entry: ${id}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve maintenance entry ${id}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get('get-all-by-automation-id/:automationId')
@@ -64,7 +100,15 @@ export class MaintenanceController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ): Promise<Maintenance[]> {
-    return this.maintenanceService.findAllByAutomationId(automationId, page, limit);
+    this.logger.log(`Retrieving maintenance entries for automation ID: ${automationId} (page: ${page}, limit: ${limit})`);
+    try {
+      const results = await this.maintenanceService.findAllByAutomationId(automationId, page, limit);
+      this.logger.log(`Retrieved ${results.length} maintenance entries for automation ID: ${automationId}`);
+      return results;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve maintenance entries for automation ${automationId}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Patch(':id')
@@ -73,7 +117,15 @@ export class MaintenanceController {
   @ApiResponse({ status: 200, description: 'Updated maintenance entry', type: Maintenance })
   @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() updateMaintenanceDto: UpdateMaintenanceDto): Promise<Maintenance> {
-    return this.maintenanceService.update(id, updateMaintenanceDto);
+    this.logger.log(`Updating maintenance entry with ID: ${id}`);
+    try {
+      const result = await this.maintenanceService.update(id, updateMaintenanceDto);
+      this.logger.log(`Maintenance entry ${id} updated successfully`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to update maintenance entry ${id}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Delete(':id')
@@ -82,6 +134,14 @@ export class MaintenanceController {
   @ApiResponse({ status: 200, description: 'Maintenance entry deleted', type: Maintenance })
   @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string): Promise<Maintenance> {
-    return this.maintenanceService.remove(id);
+    this.logger.log(`Deleting maintenance entry with ID: ${id}`);
+    try {
+      const result = await this.maintenanceService.remove(id);
+      this.logger.log(`Maintenance entry ${id} deleted successfully`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to delete maintenance entry ${id}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 }
