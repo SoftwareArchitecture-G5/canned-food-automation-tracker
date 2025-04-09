@@ -1,0 +1,42 @@
+name: Build Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Install and build backend
+      - name: Install dependencies (backend)
+        working-directory: ./backend-nestjs
+        run: npm install --force
+
+      - name: Build backend
+        working-directory: ./backend-nestjs
+        run: npm run build
+
+      # Install and build frontend
+      - name: Install dependencies (frontend)
+        working-directory: ./frontend-nextjs
+        run: npm install --force
+
+      - name: Build frontend
+        working-directory: ./frontend-nextjs
+        run: npm run build
